@@ -1,11 +1,13 @@
 #include <QDebug>
 #include <QFontDatabase>
+#include <QJsonDocument>
 #include <mozart/api/win_dark.hpp>
 #include <mozart/views/main_window.hpp>
 
 namespace
 {
-constexpr QSize MIN_WINDOW_SIZE{ 800, 600 };
+constexpr QSize WINDOW_SIZE{ 800, 600 };
+constexpr QSize MIN_WINDOW_SIZE{ 940, 500 };
 
 #ifdef Q_OS_WIN
 mozart::MainWindow *main_window_instance{};
@@ -18,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow{ parent }
 {
 	m_udp_socket->bind(QHostAddress::LocalHost);
+	m_ws.open(QUrl{ "ws://localhost:8080/gateway" });
 
 	setup_signals();
 	setup_audio();
@@ -54,27 +57,6 @@ void MainWindow::setup_signals()
 				buf.byteCount(), QHostAddress::LocalHost, 8080);
 		});
 
-	connect(m_mute_button, &HoverButton::clicked, this,
-		[this, muted = true]() mutable {
-			muted = !muted;
-
-			// Can't send audio if not connected.
-			if (!m_connected) {
-				return;
-			}
-
-			// Toggle sending audio to the server.
-			// muted ? m_audio_input->pause() :
-			// 	m_audio_input->record();
-		});
-
-	connect(m_connect_button, &QPushButton::clicked, this, [this] {
-		m_connected = !m_connected;
-
-		m_connected ? m_connect_button->setText("Disconnect") :
-			      m_connect_button->setText("Connect");
-	});
-
 	connect(m_udp_socket, &QUdpSocket::readyRead, this, [this] {
 		while (m_udp_socket->hasPendingDatagrams()) {
 			QByteArray datagram;
@@ -86,10 +68,33 @@ void MainWindow::setup_signals()
 			// Play the audio.
 		}
 	});
+
+	connect(m_navbar, &NavBar::home_clicked, this,
+		[this] { qDebug() << "home clicked"; });
+
+	connect(&m_ws, &QWebSocket::connected, this, [this] {
+		qDebug() << "connected";
+		send_message("Hello world");
+	});
+
+	connect(&m_ws, &QWebSocket::disconnected, this, [this] {
+		qDebug() << "disconnected";
+		m_ws.open(QUrl{ "ws://localhost:8080" });
+	});
+
+	connect(&m_ws, &QWebSocket::textMessageReceived, this,
+		[this](const QString &message) {
+			qDebug() << "client received: " << message;
+			m_middle_content->add_message(message);
+		});
+
+	connect(m_middle_content, &MiddleContent::message_sent, this,
+		[this](const QString &message) { send_message(message); });
 }
 
 void MainWindow::setup_ui()
 {
+	resize(WINDOW_SIZE);
 	setMinimumSize(MIN_WINDOW_SIZE);
 	winDark::setDark_Titlebar(reinterpret_cast<HWND>(winId()));
 	setWindowTitle("Mozart");
@@ -113,19 +118,30 @@ void MainWindow::setup_ui()
 	font.setPointSize(14);
 	setFont(font);
 
-	auto *label = new QLabel{ "Welcome to PornHub! 🟧⬛  😩💦",
-				  m_central_widget };
-	label->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-	m_mute_button->set_background_color(Qt::transparent);
-	m_mute_button->set_border_color(QColor{ 42, 42, 42 });
-	m_mute_button->setFixedSize(20, 20);
-
-	m_central_layout->addWidget(label, 0, Qt::AlignCenter);
-	m_central_layout->addWidget(m_connect_button);
-	m_central_layout->addWidget(m_mute_button);
-	m_central_layout->addStretch();
+	m_central_layout->setContentsMargins(0, 0, 0, 0);
+	m_central_layout->setSpacing(0);
+	m_central_layout->addWidget(m_navbar);
+	m_central_layout->addWidget(m_left_sidebar);
+	m_central_layout->addWidget(m_middle_content);
+	// spacer to keep everything.
+	m_central_layout->addSpacerItem(new QSpacerItem(
+		0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
 	setCentralWidget(m_central_widget);
+}
+
+void MainWindow::send_message(const QString &message)
+{
+	QJsonObject obj{ { "op", 2 } };
+	QJsonObject d{
+		{ "content", message },
+	};
+	obj.insert("d", d);
+
+	QJsonDocument doc{ obj };
+
+	qDebug() << "sending: " << doc.toJson();
+
+	m_ws.sendTextMessage(doc.toJson());
 }
 } // namespace mozart

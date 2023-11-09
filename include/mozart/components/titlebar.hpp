@@ -23,7 +23,7 @@ struct Titlebar : Widget {
 	void setup_ui();
 
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(this) };
-	ClickableLabel *m_logo{ new ClickableLabel(this) };
+	ClickableLabel *m_logo{ new ClickableLabel({}, this) };
 	QLabel *m_title_label{ new QLabel(this) };
 	QSpacerItem *m_spacer{ new QSpacerItem(40, 20, QSizePolicy::Expanding,
 					       QSizePolicy::Minimum) };

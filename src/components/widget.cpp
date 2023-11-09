@@ -1,5 +1,10 @@
 #include <QPainterPath>
 #include <mozart/components/widget.hpp>
+#include <qabstractanimation.h>
+#include <qdebug.h>
+#include <qeasingcurve.h>
+#include <qpropertyanimation.h>
+#include <qvariantanimation.h>
 #include <utility>
 
 namespace mozart
@@ -39,13 +44,13 @@ void Widget::set_border_size(int top, int right, int bottom, int left)
 	update();
 }
 
-void Widget::set_border_radius(int radius)
+void Widget::set_border_radius(int radius, bool animate)
 {
-	set_border_radius(radius, radius, radius, radius);
+	set_border_radius(radius, radius, radius, radius, animate);
 }
 
 void Widget::set_border_radius(int top_left, int top_right, int bottom_right,
-			       int bottom_left)
+			       int bottom_left, bool animate)
 {
 	const auto [width, height] =
 		std::make_pair(size().width(), size().height());
@@ -104,12 +109,89 @@ void Widget::set_border_radius(int top_left, int top_right, int bottom_right,
 		bottom_right = static_cast<int>(bottom_right * ratio);
 	}
 
-	m_border_radius_top_left = top_left;
-	m_border_radius_top_right = top_right;
-	m_border_radius_bottom_right = bottom_right;
-	m_border_radius_bottom_left = bottom_left;
+	if (!animate) {
+		m_border_radius_top_left = top_left;
+		m_border_radius_top_right = top_right;
+		m_border_radius_bottom_right = bottom_right;
+		m_border_radius_bottom_left = bottom_left;
+		return update();
+	}
 
-	update();
+	const auto top_left_delta = top_left - m_border_radius_top_left;
+	const auto top_right_delta = top_right - m_border_radius_top_right;
+	const auto bottom_right_delta =
+		bottom_right - m_border_radius_bottom_right;
+	const auto bottom_left_delta =
+		bottom_left - m_border_radius_bottom_left;
+
+	auto *animation = new QVariantAnimation(this);
+
+	connect(animation, &QVariantAnimation::valueChanged,
+		[this, og_top_left = m_border_radius_top_left,
+		 og_top_right = m_border_radius_top_right,
+		 og_bottom_right = m_border_radius_bottom_right,
+		 og_bottom_left = m_border_radius_bottom_left, top_left_delta,
+		 top_right_delta, bottom_right_delta,
+		 bottom_left_delta](const QVariant &value) {
+			const double progress =
+				static_cast<double>(value.toInt()) / 100.0;
+
+			const auto tl = top_left_delta * progress;
+			const auto tr = top_right_delta * progress;
+			const auto br = bottom_right_delta * progress;
+			const auto bl = bottom_left_delta * progress;
+
+			m_border_radius_top_left = og_top_left + tl;
+			m_border_radius_top_right = og_top_right + tr;
+			m_border_radius_bottom_right = og_bottom_right + br;
+			m_border_radius_bottom_left = og_bottom_left + bl;
+
+			update();
+		});
+
+	animation->setDuration(250);
+	animation->setStartValue(0);
+	animation->setEndValue(100);
+	animation->setEasingCurve(QEasingCurve::InOutCubic);
+	animation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void Widget::set_fixed_size(int w, int h, std::optional<int> animation_ms)
+{
+	if (!animation_ms) {
+		return setFixedSize(w, h);
+	}
+
+	const auto [width, height] =
+		std::make_pair(size().width(), size().height());
+	auto *animation = new QVariantAnimation(this);
+
+	connect(animation, &QVariantAnimation::valueChanged,
+		[this, og_width = width, og_height = height,
+		 width_delta = w - width,
+		 height_delta = h - height](const QVariant &value) {
+			const double progress =
+				static_cast<double>(value.toInt()) / 100.0;
+
+			const auto wd = width_delta * progress;
+			const auto hd = height_delta * progress;
+			const auto new_width = og_width + wd;
+			const auto new_height = og_height + hd;
+
+			//  qDebug() << "Old width: " << og_width
+			// 	  << "Old height: " << og_height;
+
+			//  qDebug() << "New width: " << new_width
+			// 	  << "New height: " << new_height;
+
+			setFixedSize(new_width, new_height);
+		});
+
+	animation->setDuration(*animation_ms);
+	animation->setStartValue(0);
+	animation->setEndValue(100);
+	animation->setEasingCurve(QEasingCurve::InOutCubic);
+	animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void Widget::set_image(const QString &file, bool centered, QRect coords)

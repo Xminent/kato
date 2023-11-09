@@ -6,6 +6,7 @@
 #include <QPainterPath>
 #include <QPen>
 #include <QWidget>
+#include <optional>
 
 namespace mozart
 {
@@ -16,10 +17,11 @@ struct Widget : QWidget {
 	void set_border_color(QColor color);
 	void set_border_size(int size);
 	void set_border_size(int top, int right, int bottom, int left);
-	void set_border_radius(int radius);
-
+	void set_border_radius(int radius, bool animate = false);
 	void set_border_radius(int top_left, int top_right, int bottom_right,
-			       int bottom_left);
+			       int bottom_left, bool animate = false);
+	void set_fixed_size(int w, int h,
+			    std::optional<int> animation_ms = std::nullopt);
 	void set_image(const QString &file, bool centered = true,
 		       QRect coords = QRect());
 	void set_movie(QMovie *movie, bool centered = true,

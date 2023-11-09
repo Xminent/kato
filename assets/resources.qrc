@@ -17,6 +17,17 @@
     <file>icons/volume_low.svg</file>
     <file>icons/volume_off.svg</file>
     <file>icons/mute.svg</file>
+    <file>icons/announcements.svg</file>
+    <file>icons/attachment_button.svg</file>
+    <file>icons/arrow.svg</file>
+    <file>icons/gif_button.svg</file>
+    <file>icons/gift_button.svg</file>
+    <file>icons/home-icon.svg</file>
+    <file>icons/stage.svg</file>
+    <file>icons/sticker_icon.svg</file>
+    <file>icons/text.svg</file>
+    <file>icons/text_limited.svg</file>
+    <file>icons/voice.svg</file>
     <file>images/logo.png</file>
     <file>images/mozart.png</file>
   </qresource>

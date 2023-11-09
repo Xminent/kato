@@ -39,12 +39,9 @@ void Titlebar::setup_ui()
 	m_central_layout->addItem(m_spacer);
 	m_central_layout->addWidget(m_profile_picture);
 	m_central_layout->addItem(m_spacer2);
-	m_central_layout->addWidget(m_minimize_button);
-	m_central_layout->addWidget(m_maximize_button);
-	m_central_layout->addWidget(m_close_button);
-	m_central_layout->setAlignment(m_minimize_button, Qt::AlignTop);
-	m_central_layout->setAlignment(m_maximize_button, Qt::AlignTop);
-	m_central_layout->setAlignment(m_close_button, Qt::AlignTop);
+	m_central_layout->addWidget(m_minimize_button, 0, Qt::AlignTop);
+	m_central_layout->addWidget(m_maximize_button, 0, Qt::AlignTop);
+	m_central_layout->addWidget(m_close_button, 0, Qt::AlignTop);
 	m_central_layout->setContentsMargins(0, 0, 0, 0);
 	m_central_layout->setSpacing(0);
 

@@ -13,7 +13,9 @@ set(CMAKE_AUTORCC ON)
 
 list(APPEND CMAKE_PREFIX_PATH "C:/Qt/Qt5.12.12/5.12.12/msvc2017_64")
 
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Multimedia Network Widgets)
+find_package(
+    Qt5 REQUIRED COMPONENTS Core Gui Multimedia Network Websockets Widgets
+)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp" "include/*.hpp")
 
@@ -38,9 +40,8 @@ target_include_directories(
     ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 target_link_libraries(
-    ${PROJECT_NAME}
-    PRIVATE ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Multimedia_LIBRARIES}
-            ${Qt5Network_LIBRARIES} ${Qt5Widgets_LIBRARIES}
+    ${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::Network
+                            Qt5::WebSockets Qt5::Widgets
 )
 
 if(WIN32)

@@ -6,18 +6,30 @@
 
 namespace mozart
 {
-class ClickableLabel : public QLabel {
+struct ClickableLabel : QLabel {
 	Q_OBJECT
+
     public:
-	explicit ClickableLabel(QWidget *parent = nullptr);
-	explicit ClickableLabel(const QString &text, QWidget *parent = nullptr);
+	struct Args {
+		QString text;
+		std::function<void()> on_enter;
+		std::function<void()> on_leave;
+	};
+
+	explicit ClickableLabel(const Args &args = {},
+				QWidget *parent = nullptr);
 
     signals:
 	void clicked();
 	void left_clicked();
 	void right_clicked();
 
-    protected:
+    private:
+	std::function<void()> m_on_enter;
+	std::function<void()> m_on_leave;
+
+	void enterEvent(QEvent *event) override;
+	void leaveEvent(QEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 };
 } // namespace mozart

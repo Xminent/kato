@@ -1,5 +1,5 @@
-#ifndef NOW_PLAYING_BAR_BUTTON_HPP
-#define NOW_PLAYING_BAR_BUTTON_HPP
+#ifndef MOZART_COMPONENTS_HOVER_BUTTON_HPP
+#define MOZART_COMPONENTS_HOVER_BUTTON_HPP
 
 #include <mozart/components/widget.hpp>
 
@@ -26,4 +26,4 @@ struct HoverButton : Widget {
 };
 } // namespace mozart
 
-#endif // NOW_PLAYING_BAR_BUTTON_HPP
+#endif // MOZART_COMPONENTS_HOVER_BUTTON_HPP

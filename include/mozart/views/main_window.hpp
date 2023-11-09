@@ -6,7 +6,10 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QUdpSocket>
-#include <mozart/components/hover_button.hpp>
+#include <QtWebSockets/QWebSocket>
+#include <mozart/components/left_sidebar.hpp>
+#include <mozart/components/middle_content.hpp>
+#include <mozart/components/navbar.hpp>
 #include <mozart/components/titlebar.hpp>
 
 namespace mozart
@@ -26,21 +29,26 @@ struct MainWindow : QMainWindow {
 	void setup_audio();
 	void setup_signals();
 	void setup_ui();
+	void send_message(const QString &message);
 
 	QWidget *m_central_widget{ new QWidget(this) };
-	QVBoxLayout *m_central_layout{ new QVBoxLayout(m_central_widget) };
+	QHBoxLayout *m_central_layout{ new QHBoxLayout(m_central_widget) };
+	NavBar *m_navbar{ new NavBar(m_central_widget) };
+	LeftSidebar *m_left_sidebar{ new LeftSidebar("Guild",
+						     m_central_widget) };
+	MiddleContent *m_middle_content{ new MiddleContent("Test",
+							   m_central_widget) };
 
 	// AudioRecording setup.
 	QAudioProbe *m_audio_probe{ new QAudioProbe(this) };
 	QAudioRecorder *m_audio_input{ new QAudioRecorder(this) };
-	HoverButton *m_mute_button{ new HoverButton(
-		QPixmap{ ":/icons/mute.svg" }, m_central_widget) };
 
-	// Udp/client setup.
+	// Udp/client setup. (AUDIO)
 	QUdpSocket *m_udp_socket{ new QUdpSocket(this) };
-	QPushButton *m_connect_button{ new QPushButton("Connect",
-						       m_central_widget) };
-	bool m_connected{};
+	bool m_udp_connected{};
+
+	// Websocket setup.
+	QWebSocket m_ws;
 
 	// User settings.
 };

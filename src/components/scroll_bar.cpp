@@ -33,6 +33,7 @@ ScrollBar::ScrollBar(Qt::Orientation orientation, QWidget *parent)
 		"}"
 		"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
 		"    background: none;"
+		"}"
 		"QScrollBar:horizontal {"
 		"    height: 8px;"
 		"    background: #121212;"
