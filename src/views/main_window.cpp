@@ -157,10 +157,14 @@ void MainWindow::send_message(const QString &message)
 	};
 	QJsonDocument doc{ data };
 
-	qDebug() << "Sending: " << doc.toJson(QJsonDocument::Compact);
+	auto url =
+		QString{ "http://localhost:8080/api/channels/%1/messages" }.arg(
+			m_middle_content->id());
 
-	auto req = QNetworkRequest{ QUrl{
-		"http://localhost:8080/api/channels/0/messages" } };
+	qDebug() << "Sending: " << doc.toJson(QJsonDocument::Compact) << " to "
+		 << url;
+
+	auto req = QNetworkRequest{ QUrl{ url } };
 
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
