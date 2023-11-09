@@ -12,6 +12,25 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 	setup_ui();
 }
 
+void LeftSidebar::set_channels(const std::map<uint64_t, QString> &channels)
+{
+	while (m_channel_layout->count() > 0) {
+		auto *item = m_channel_layout->itemAt(0)->widget();
+
+		if (item == nullptr) {
+			continue;
+		}
+
+		disconnect(item, nullptr, nullptr, nullptr);
+		m_channel_layout->removeWidget(item);
+		delete item;
+	}
+
+	for (const auto &[id, name] : channels) {
+		add_channel(new ChannelItem{ id, name, this });
+	}
+}
+
 void LeftSidebar::setup_ui()
 {
 	setFrameShape(Shape::NoFrame);
@@ -86,21 +105,14 @@ void LeftSidebar::setup_ui()
 
 	m_layout->addWidget(m_header);
 	m_layout->addLayout(m_channel_layout);
-	// spacer to keep things at the top.
 	m_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum,
 						QSizePolicy::Expanding));
-
-	// TODO: Remove debug
-	for (int i{}; i < 10; i++) {
-		auto *c = new ChannelItem(QString::number(i), this);
-		add_channel(c);
-	}
 }
 
 void LeftSidebar::add_channel(ChannelItem *channel)
 {
 	connect(channel, &ChannelItem::left_clicked, this,
-		[this](const ChannelItem *c) {
+		[this](ChannelItem *c) {
 			for (int i{}; i < m_channel_layout->count(); i++) {
 				if (auto *item = qobject_cast<ChannelItem *>(
 					    m_channel_layout->itemAt(i)
@@ -109,6 +121,8 @@ void LeftSidebar::add_channel(ChannelItem *channel)
 					item->set_clicked(false);
 				}
 			}
+
+			emit channel_selected(c);
 		});
 
 	m_channel_layout->addWidget(channel);

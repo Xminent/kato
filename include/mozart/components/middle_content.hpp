@@ -16,7 +16,13 @@ class MiddleContent : public Widget {
 	Q_OBJECT
 
     public:
-	explicit MiddleContent(const QString &name, QWidget *parent = nullptr);
+	explicit MiddleContent(uint64_t id, const QString &name,
+			       QWidget *parent = nullptr);
+
+	[[nodiscard]] uint64_t id() const
+	{
+		return m_id;
+	}
 
 	void add_message(const QString &message);
 
@@ -27,6 +33,7 @@ class MiddleContent : public Widget {
 	void setup_ui();
 
 	QString m_name;
+	uint64_t m_id{};
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(this) };
 	QVBoxLayout *m_main_layout{ new QVBoxLayout() };
 	Header *m_header{};

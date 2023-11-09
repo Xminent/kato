@@ -10,8 +10,9 @@ constexpr uint8_t ROUNDED_RECT_RADIUS = 7;
 
 namespace mozart
 {
-ChannelItem::ChannelItem(const QString &name, QWidget *parent)
+ChannelItem::ChannelItem(uint64_t id, const QString &name, QWidget *parent)
 	: Widget{ parent }
+	, m_id{ id }
 	, m_name{ name }
 {
 	setup_ui();

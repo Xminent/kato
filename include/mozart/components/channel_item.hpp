@@ -13,7 +13,13 @@ struct ChannelItem : Widget {
 	Q_OBJECT
 
     public:
-	explicit ChannelItem(const QString &name, QWidget *parent = nullptr);
+	explicit ChannelItem(uint64_t id, const QString &name,
+			     QWidget *parent = nullptr);
+
+	[[nodiscard]] uint64_t id() const
+	{
+		return m_id;
+	}
 
 	void set_clicked(bool clicked);
 
@@ -41,6 +47,7 @@ struct ChannelItem : Widget {
 
 	// Metadata
 
+	uint64_t m_id{};
 	QString m_name;
 	bool m_is_private{};
 	bool m_clicked{};

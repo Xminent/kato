@@ -7,8 +7,9 @@
 
 namespace mozart
 {
-MiddleContent::MiddleContent(const QString &name, QWidget *parent)
+MiddleContent::MiddleContent(uint64_t id, const QString &name, QWidget *parent)
 	: Widget{ parent }
+	, m_id{ id }
 	, m_name{ name }
 	, m_header{ new Header(name, QPixmap{ ":/icons/text.svg" }, this) }
 {

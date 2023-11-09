@@ -26,12 +26,12 @@ MainWindow::MainWindow(QWidget *parent)
 	m_udp_socket->bind(QHostAddress::LocalHost);
 	m_ws.open(QUrl{ "ws://localhost:8080/gateway" });
 
-	// Look for rooms.
-	QNetworkRequest req{ QUrl{ "http://localhost:8080/api/rooms" } };
+	// Look for channels.
+	QNetworkRequest req{ QUrl{ "http://localhost:8080/api/channels" } };
 	auto *reply = m_network_manager->get(req);
 
 	connect(reply, &QNetworkReply::finished,
-		[this, reply] { handle_get_rooms(reply); });
+		[this, reply] { handle_get_channels(reply); });
 
 	setup_signals();
 	setup_audio();
@@ -83,6 +83,11 @@ void MainWindow::setup_signals()
 	connect(m_navbar, &NavBar::home_clicked, this,
 		[this] { qDebug() << "home clicked"; });
 
+	connect(m_left_sidebar, &LeftSidebar::channel_selected, this,
+		[this](const ChannelItem *channel) {
+			set_middle_content(m_middle_contents[channel->id()]);
+		});
+
 	connect(&m_ws, &QWebSocket::connected, this, [this] {
 		qDebug() << "connected";
 		send_message("Hello world");
@@ -107,9 +112,6 @@ void MainWindow::setup_signals()
 				handle_gateway_event(json.object());
 			}
 		});
-
-	connect(m_middle_content, &MiddleContent::message_sent, this,
-		[this](const QString &message) { send_message(message); });
 }
 
 void MainWindow::setup_ui()
@@ -150,42 +152,82 @@ void MainWindow::setup_ui()
 
 void MainWindow::send_message(const QString &message)
 {
-	QJsonObject obj{ { "op", 2 } };
-	QJsonObject d{
+	QJsonObject data{
 		{ "content", message },
 	};
-	obj.insert("d", d);
+	QJsonDocument doc{ data };
 
-	QJsonDocument doc{ obj };
+	qDebug() << "Sending: " << doc.toJson(QJsonDocument::Compact);
 
-	qDebug() << "sending: " << doc;
+	auto req = QNetworkRequest{ QUrl{
+		"http://localhost:8080/api/channels/0/messages" } };
 
-	m_ws.sendTextMessage(doc.toJson());
+	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+	auto *reply = m_network_manager->post(
+		req, doc.toJson(QJsonDocument::Compact));
+
+	connect(reply, &QNetworkReply::finished, reply, [reply] {
+		if (reply->error() != QNetworkReply::NoError) {
+			qDebug() << "Error: " << reply->errorString();
+		}
+
+		reply->deleteLater();
+	});
 }
 
 void MainWindow::handle_gateway_event(const QJsonObject &json)
 {
 	qDebug() << "received JSON: " << json;
 
-	const auto op = json.find("op");
-	const auto content = json.find("content");
+	const auto op_it = json.find("op");
+	const auto d_it = json.find("d");
 
-	if (op == json.end() || content == json.end() || !op->isDouble() ||
-	    !content->isString()) {
+	if (op_it == json.end() || !op_it->isDouble() || d_it == json.end() ||
+	    !d_it->isObject()) {
 		qDebug() << "Invalid JSON: " << json;
 		return;
 	}
 
-	switch (op->toInt()) {
-	case 2:
+	const auto op = op_it->toInt();
+	const auto d = d_it->toObject();
+
+	switch (op) {
+	case 2: {
+		const auto content = d.find("content");
+
+		if (content == d.end() || !content->isString()) {
+			qDebug() << "Invalid JSON: " << d;
+			return;
+		}
+
 		m_middle_content->add_message(content->toString());
 		break;
+	}
+	case 3: {
+		const auto id_it = d.find("id");
+		const auto name_it = d.find("name");
+
+		if (id_it == json.end() || name_it == json.end() ||
+		    !id_it->isDouble() || !name_it->isString()) {
+			qDebug() << "Invalid JSON: " << json;
+			return;
+		}
+
+		const auto id = static_cast<uint64_t>(id_it->toDouble());
+		const auto name = name_it->toString();
+
+		add_middle_content(id, name);
+		m_channels.emplace(id, name);
+		m_left_sidebar->set_channels(m_channels);
+		break;
+	}
 	default:
 		qDebug() << "Unknown event: " << json;
 	}
 }
 
-void MainWindow::handle_get_rooms(QNetworkReply *reply)
+void MainWindow::handle_get_channels(QNetworkReply *reply)
 {
 	defer
 	{
@@ -204,20 +246,63 @@ void MainWindow::handle_get_rooms(QNetworkReply *reply)
 		return;
 	}
 
-	const auto rooms = json.array();
+	const auto channels = json.array();
 
-	for (const auto &room : rooms) {
-		const auto obj = room.toObject();
-		const auto id = obj.value("id").toInt();
-		const auto name = obj.value("name").toString();
+	for (const auto &channel : channels) {
+		const auto obj = channel.toObject();
+		const auto id_it = obj.find("id");
+		const auto name_it = obj.find("name");
 
-		m_middle_contents.emplace(id, new MiddleContent{ name, this });
-
-		if (m_middle_content == nullptr) {
-			m_middle_content = m_middle_contents.at(id);
-			// insert into layout into idx 2
-			m_central_layout->insertWidget(2, m_middle_content);
+		if (id_it == obj.end() || name_it == obj.end() ||
+		    !id_it->isDouble() || !name_it->isString()) {
+			continue;
 		}
+
+		const auto id = static_cast<uint64_t>(id_it->toDouble());
+		const auto name = name_it->toString();
+
+		add_middle_content(id, name);
+		m_channels.emplace(id, name);
+
+		// TODO: This should belong to some first-time setup.
+		if (m_middle_content == nullptr) {
+			set_middle_content(m_middle_contents.at(id));
+		}
+	}
+
+	// Set the channels in the left sidebar.
+	m_left_sidebar->set_channels(m_channels);
+}
+
+void MainWindow::add_middle_content(uint64_t id, const QString &name)
+{
+	if (m_middle_contents.find(id) != m_middle_contents.end()) {
+		return;
+	}
+
+	auto *middle_content = new MiddleContent{ id, name, this };
+	m_middle_contents.emplace(id, middle_content);
+
+	connect(middle_content, &MiddleContent::message_sent, this,
+		[this](const QString &message) { send_message(message); });
+}
+
+void MainWindow::set_middle_content(MiddleContent *content)
+{
+	if (content == m_middle_content) {
+		return;
+	}
+
+	if (m_middle_content != nullptr) {
+		m_central_layout->removeWidget(m_middle_content);
+		m_middle_content->hide();
+	}
+
+	m_middle_content = content;
+
+	if (m_middle_content != nullptr) {
+		m_central_layout->insertWidget(2, m_middle_content);
+		m_middle_content->show();
 	}
 }
 } // namespace mozart

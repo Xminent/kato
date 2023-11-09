@@ -1,19 +1,23 @@
 #ifndef MOZART_COMPONENTS_LEFT_SIDEBAR_HPP
 #define MOZART_COMPONENTS_LEFT_SIDEBAR_HPP
 
-#include "mozart/components/header.hpp"
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <mozart/components/channel_item.hpp>
+#include <mozart/components/header.hpp>
 #include <mozart/components/smooth_scroll_bar.hpp>
 
 namespace mozart
 {
+struct MiddleContent;
+
 struct LeftSidebar : QScrollArea {
 	Q_OBJECT
 
     public:
 	explicit LeftSidebar(const QString &name, QWidget *parent = nullptr);
+
+	void set_channels(const std::map<uint64_t, QString> &channels);
 
     signals:
 	void channel_selected(ChannelItem *channel);

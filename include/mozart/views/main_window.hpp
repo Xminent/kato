@@ -32,17 +32,21 @@ struct MainWindow : QMainWindow {
 	void setup_ui();
 	void send_message(const QString &message);
 	void handle_gateway_event(const QJsonObject &json);
-	void handle_get_rooms(QNetworkReply *reply);
+	void handle_get_channels(QNetworkReply *reply);
+	void add_middle_content(uint64_t id, const QString &name);
+	void set_middle_content(MiddleContent *content);
 
 	QWidget *m_central_widget{ new QWidget(this) };
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(m_central_widget) };
 	NavBar *m_navbar{ new NavBar(m_central_widget) };
+
 	LeftSidebar *m_left_sidebar{ new LeftSidebar("Guild",
 						     m_central_widget) };
 
 	// Represents the chat content for each individual channel.
-	std::unordered_map<uint64_t, MiddleContent *> m_middle_contents;
+	std::map<uint64_t, MiddleContent *> m_middle_contents;
 	MiddleContent *m_middle_content{};
+	std::map<uint64_t, QString> m_channels;
 
 	// AudioRecording setup.
 	QAudioProbe *m_audio_probe{ new QAudioProbe(this) };
