@@ -11,6 +11,7 @@
 #include <mozart/components/middle_content.hpp>
 #include <mozart/components/navbar.hpp>
 #include <mozart/components/titlebar.hpp>
+#include <qnetworkaccessmanager.h>
 
 namespace mozart
 {
@@ -30,14 +31,18 @@ struct MainWindow : QMainWindow {
 	void setup_signals();
 	void setup_ui();
 	void send_message(const QString &message);
+	void handle_gateway_event(const QJsonObject &json);
+	void handle_get_rooms(QNetworkReply *reply);
 
 	QWidget *m_central_widget{ new QWidget(this) };
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(m_central_widget) };
 	NavBar *m_navbar{ new NavBar(m_central_widget) };
 	LeftSidebar *m_left_sidebar{ new LeftSidebar("Guild",
 						     m_central_widget) };
-	MiddleContent *m_middle_content{ new MiddleContent("Test",
-							   m_central_widget) };
+
+	// Represents the chat content for each individual channel.
+	std::unordered_map<uint64_t, MiddleContent *> m_middle_contents;
+	MiddleContent *m_middle_content{};
 
 	// AudioRecording setup.
 	QAudioProbe *m_audio_probe{ new QAudioProbe(this) };
@@ -49,6 +54,10 @@ struct MainWindow : QMainWindow {
 
 	// Websocket setup.
 	QWebSocket m_ws;
+
+	// Http setup.
+	QNetworkAccessManager *m_network_manager{ new QNetworkAccessManager(
+		this) };
 
 	// User settings.
 };

@@ -29,8 +29,7 @@ class MiddleContent : public Widget {
 	QString m_name;
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(this) };
 	QVBoxLayout *m_main_layout{ new QVBoxLayout() };
-	Header *m_header{ new Header("test", QPixmap{ ":/icons/text.svg" },
-				     this) };
+	Header *m_header{};
 	QScrollArea *m_scroll_area{ new QScrollArea(this) };
 	ScrollBar *m_scroll_bar{ new ScrollBar(Qt::Vertical, this) };
 	Widget *m_scroll_area_widget_contents{ new Widget() };

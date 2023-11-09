@@ -1,8 +1,12 @@
 #include <QDebug>
 #include <QFontDatabase>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <mozart/api/win_dark.hpp>
+#include <mozart/defer.hpp>
 #include <mozart/views/main_window.hpp>
+#include <qnetworkreply.h>
+#include <qnetworkrequest.h>
 
 namespace
 {
@@ -21,6 +25,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	m_udp_socket->bind(QHostAddress::LocalHost);
 	m_ws.open(QUrl{ "ws://localhost:8080/gateway" });
+
+	// Look for rooms.
+	QNetworkRequest req{ QUrl{ "http://localhost:8080/api/rooms" } };
+	auto *reply = m_network_manager->get(req);
+
+	connect(reply, &QNetworkReply::finished,
+		[this, reply] { handle_get_rooms(reply); });
 
 	setup_signals();
 	setup_audio();
@@ -84,8 +95,17 @@ void MainWindow::setup_signals()
 
 	connect(&m_ws, &QWebSocket::textMessageReceived, this,
 		[this](const QString &message) {
-			qDebug() << "client received: " << message;
-			m_middle_content->add_message(message);
+			const auto json =
+				QJsonDocument::fromJson(message.toUtf8());
+
+			if (json.isNull()) {
+				qDebug() << "Failed to parse JSON: " << message;
+				return;
+			}
+
+			if (json.isObject()) {
+				handle_gateway_event(json.object());
+			}
 		});
 
 	connect(m_middle_content, &MiddleContent::message_sent, this,
@@ -122,8 +142,6 @@ void MainWindow::setup_ui()
 	m_central_layout->setSpacing(0);
 	m_central_layout->addWidget(m_navbar);
 	m_central_layout->addWidget(m_left_sidebar);
-	m_central_layout->addWidget(m_middle_content);
-	// spacer to keep everything.
 	m_central_layout->addSpacerItem(new QSpacerItem(
 		0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
@@ -140,8 +158,66 @@ void MainWindow::send_message(const QString &message)
 
 	QJsonDocument doc{ obj };
 
-	qDebug() << "sending: " << doc.toJson();
+	qDebug() << "sending: " << doc;
 
 	m_ws.sendTextMessage(doc.toJson());
+}
+
+void MainWindow::handle_gateway_event(const QJsonObject &json)
+{
+	qDebug() << "received JSON: " << json;
+
+	const auto op = json.find("op");
+	const auto content = json.find("content");
+
+	if (op == json.end() || content == json.end() || !op->isDouble() ||
+	    !content->isString()) {
+		qDebug() << "Invalid JSON: " << json;
+		return;
+	}
+
+	switch (op->toInt()) {
+	case 2:
+		m_middle_content->add_message(content->toString());
+		break;
+	default:
+		qDebug() << "Unknown event: " << json;
+	}
+}
+
+void MainWindow::handle_get_rooms(QNetworkReply *reply)
+{
+	defer
+	{
+		reply->deleteLater();
+	};
+
+	if (reply->error() != QNetworkReply::NoError) {
+		qDebug() << "Error: " << reply->errorString();
+		return;
+	}
+
+	const auto res = reply->readAll();
+	const auto json = QJsonDocument::fromJson(res);
+
+	if (!json.isArray()) {
+		return;
+	}
+
+	const auto rooms = json.array();
+
+	for (const auto &room : rooms) {
+		const auto obj = room.toObject();
+		const auto id = obj.value("id").toInt();
+		const auto name = obj.value("name").toString();
+
+		m_middle_contents.emplace(id, new MiddleContent{ name, this });
+
+		if (m_middle_content == nullptr) {
+			m_middle_content = m_middle_contents.at(id);
+			// insert into layout into idx 2
+			m_central_layout->insertWidget(2, m_middle_content);
+		}
+	}
 }
 } // namespace mozart

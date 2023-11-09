@@ -1,4 +1,3 @@
-#include "mozart/components/clickable_label.hpp"
 #include <mozart/components/message_item.hpp>
 
 namespace mozart
@@ -57,17 +56,20 @@ void MessageItem::setup_ui()
 	m_author_label->setCursor(Qt::PointingHandCursor);
 	m_date_label->setFont(QFont{ "Inter", 8 });
 	m_date_label->setStyleSheet("color: gray;");
+	m_message_label->setCursor(Qt::IBeamCursor);
 
 	m_horizontal_layout->addWidget(m_author_label);
 	m_horizontal_layout->addSpacerItem(new QSpacerItem(
 		8, 0, QSizePolicy::Fixed, QSizePolicy::Minimum));
 	m_horizontal_layout->addWidget(m_date_label);
+	m_horizontal_layout->addSpacerItem(new QSpacerItem(
+		0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
 	m_vertical_layout->setContentsMargins(0, 0, 0, 0);
 	m_vertical_layout->setSpacing(0);
 	m_vertical_layout->addLayout(m_horizontal_layout);
 	m_vertical_layout->addSpacerItem(new QSpacerItem(
-		0, 12, QSizePolicy::Minimum, QSizePolicy::Fixed));
+		0, 8, QSizePolicy::Minimum, QSizePolicy::Fixed));
 	m_vertical_layout->addWidget(m_message_label);
 
 	m_layout->addWidget(m_avatar_label);

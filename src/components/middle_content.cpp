@@ -10,6 +10,7 @@ namespace mozart
 MiddleContent::MiddleContent(const QString &name, QWidget *parent)
 	: Widget{ parent }
 	, m_name{ name }
+	, m_header{ new Header(name, QPixmap{ ":/icons/text.svg" }, this) }
 {
 	setup_ui();
 

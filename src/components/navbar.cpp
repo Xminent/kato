@@ -60,13 +60,6 @@ void NavBar::setup_ui()
 						QSizePolicy::Expanding));
 
 	add_item(m_home_button);
-
-	// TODO: Remove debug. Add 10 GuildIcons.
-	for (int i{}; i < 5; i++) {
-		auto *item = new NavBarItem(QString("%1").arg(i), this);
-
-		add_item(item);
-	}
 }
 
 void NavBar::wheelEvent(QWheelEvent *e)

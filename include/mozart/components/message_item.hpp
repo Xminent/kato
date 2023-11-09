@@ -1,7 +1,7 @@
 #ifndef MOZART_COMPONENTS_MESSAGE_ITEM_HPP
 #define MOZART_COMPONENTS_MESSAGE_ITEM_HPP
 
-#include "mozart/components/clickable_label.hpp"
+#include <mozart/components/clickable_label.hpp>
 #include <mozart/components/widget.hpp>
 #include <qboxlayout.h>
 #include <qdatetime.h>
