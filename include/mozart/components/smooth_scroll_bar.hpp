@@ -10,7 +10,8 @@ struct SmoothScrollBar : QScrollBar {
 	Q_OBJECT
 
     public:
-	explicit SmoothScrollBar(QWidget *parent = nullptr);
+	explicit SmoothScrollBar(Qt::Orientation orientation = Qt::Vertical,
+				 QWidget *parent = nullptr);
 
     private:
 	void mousePressEvent(QMouseEvent *e) override;

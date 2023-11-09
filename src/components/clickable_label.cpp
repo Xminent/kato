@@ -2,25 +2,19 @@
 
 namespace mozart
 {
-ClickableLabel::ClickableLabel(const Args &args, QWidget *parent)
-	: QLabel(args.text, parent)
-	, m_on_enter{ args.on_enter }
-	, m_on_leave{ args.on_leave }
+ClickableLabel::ClickableLabel(const QString &text, QWidget *parent)
+	: QLabel(text, parent)
 {
 }
 
 void ClickableLabel::enterEvent(QEvent *event)
 {
-	if (m_on_enter) {
-		m_on_enter();
-	}
+	emit on_enter();
 }
 
 void ClickableLabel::leaveEvent(QEvent *event)
 {
-	if (m_on_leave) {
-		m_on_leave();
-	}
+	emit on_leave();
 }
 
 void ClickableLabel::mousePressEvent(QMouseEvent *event)

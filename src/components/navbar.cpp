@@ -1,3 +1,4 @@
+#include <QMouseEvent>
 #include <mozart/components/navbar.hpp>
 
 namespace mozart

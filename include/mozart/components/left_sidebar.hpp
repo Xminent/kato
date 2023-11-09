@@ -2,8 +2,8 @@
 #define MOZART_COMPONENTS_LEFT_SIDEBAR_HPP
 
 #include <QScrollArea>
-#include <QVBoxLayout>
 #include <mozart/components/channel_item.hpp>
+#include <mozart/components/dropdown_group.hpp>
 #include <mozart/components/header.hpp>
 #include <mozart/components/smooth_scroll_bar.hpp>
 
@@ -33,9 +33,14 @@ struct LeftSidebar : QScrollArea {
 	QVBoxLayout *m_layout{ new QVBoxLayout(m_content) };
 	QString m_name;
 	Header *m_header{};
+
 	QVBoxLayout *m_channel_layout{ new QVBoxLayout() };
+	DropdownGroup *m_text_channels{ new DropdownGroup("Text Channels",
+							  this) };
+
 	/// Used to store the scroll bar.
-	SmoothScrollBar *m_scroll_bar{ new SmoothScrollBar(this) };
+	SmoothScrollBar *m_scroll_bar{ new SmoothScrollBar(Qt::Vertical,
+							   this) };
 };
 } // namespace mozart
 

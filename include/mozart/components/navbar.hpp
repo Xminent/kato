@@ -2,8 +2,6 @@
 #define COMPONENTS_NAVBAR_HPP
 
 #include <QScrollArea>
-#include <QVBoxLayout>
-#include <QWheelEvent>
 #include <mozart/components/navbar_item.hpp>
 #include <mozart/components/smooth_scroll_bar.hpp>
 
@@ -31,7 +29,8 @@ struct NavBar : QScrollArea {
 	QVBoxLayout *m_icon_layout{ new QVBoxLayout() };
 	NavBarItem *m_home_button{ new NavBarItem(std::nullopt, this) };
 	/// Used to store the scroll bar.
-	SmoothScrollBar *m_scroll_bar{ new SmoothScrollBar(m_content) };
+	SmoothScrollBar *m_scroll_bar{ new SmoothScrollBar(Qt::Vertical,
+							   m_content) };
 };
 } // namespace mozart
 

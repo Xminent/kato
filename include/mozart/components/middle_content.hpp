@@ -1,14 +1,10 @@
 #ifndef MOZART_COMPONENTS_MIDDLE_CONTENT_HPP
 #define MOZART_COMPONENTS_MIDDLE_CONTENT_HPP
 
-#include "mozart/components/form.hpp"
-#include "mozart/components/header.hpp"
-#include <QHBoxLayout>
-#include <QLabel>
 #include <QScrollArea>
+#include <mozart/components/form.hpp>
+#include <mozart/components/header.hpp>
 #include <mozart/components/scroll_bar.hpp>
-#include <mozart/components/widget.hpp>
-#include <qboxlayout.h>
 
 namespace mozart
 {
@@ -32,8 +28,8 @@ class MiddleContent : public Widget {
     private:
 	void setup_ui();
 
-	QString m_name;
 	uint64_t m_id{};
+	QString m_name;
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(this) };
 	QVBoxLayout *m_main_layout{ new QVBoxLayout() };
 	Header *m_header{};

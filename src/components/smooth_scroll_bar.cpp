@@ -2,14 +2,72 @@
 
 namespace mozart
 {
-SmoothScrollBar::SmoothScrollBar(QWidget *parent)
-	: QScrollBar(parent)
+SmoothScrollBar::SmoothScrollBar(Qt::Orientation orientation, QWidget *parent)
+	: QScrollBar{ orientation, parent }
 {
 	m_scroll_animation->setParent(parent);
 	// Set animation curves , stay Qt There is a detailed introduction in the document
 	m_scroll_animation->setEasingCurve(QEasingCurve::OutCubic);
 	// Set animation time , The smaller the value, the faster the playback
 	m_scroll_animation->setDuration(0);
+
+	setStyleSheet(
+		"QScrollBar:vertical {"
+		"    width: 8px;"
+		"    background: #121212;"
+		"    margin: 0px 0px 0px 0px;"
+		"    border: 1px transparent #2A2929;"
+		"    border-radius: 4px;"
+		"}"
+		"QScrollBar::handle:vertical {"
+		"    background: #2A2929;"
+		"    min-height: 0px;"
+		"    border-radius: 4px;"
+		"}"
+		"QScrollBar::add-line:vertical {"
+		"    height: 0px;"
+		"    subcontrol-position: bottom;"
+		"    subcontrol-origin: margin;"
+		"}"
+		"QScrollBar::sub-line:vertical {"
+		"    height: 0 px;"
+		"    subcontrol-position: top;"
+		"    subcontrol-origin: margin;"
+		"}"
+		"QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
+		"    background: none;"
+		"}"
+		"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+		"    background: none;"
+		"}"
+		"QScrollBar:horizontal {"
+		"    height: 8px;"
+		"    background: #121212;"
+		"    margin: 0px 0px 0px 0px;"
+		"    border: 1px transparent #2A2929;"
+		"    border-radius: 4px;"
+		"}"
+		"QScrollBar::handle:horizontal {"
+		"    background: #2A2929;"
+		"    min-height: 0px;"
+		"    border-radius: 4px;"
+		"}"
+		"QScrollBar::add-line:horizontal {"
+		"    height: 0px;"
+		"    subcontrol-position: bottom;"
+		"    subcontrol-origin: margin;"
+		"}"
+		"QScrollBar::sub-line:horizontal {"
+		"    height: 0 px;"
+		"    subcontrol-position: top;"
+		"    subcontrol-origin: margin;"
+		"}"
+		"QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal {"
+		"    background: none;"
+		"}"
+		"QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {"
+		"    background: none;"
+		"}");
 }
 
 void SmoothScrollBar::set_value(int value) const

@@ -38,9 +38,8 @@ void Form::setup_ui()
 	m_input->setFrameShape(QFrame::NoFrame);
 	m_input->setFont(QFont("Inter", 11));
 	m_input->setMinimumHeight(44);
-	// apply border radius to input, make the background rgb(12, 12, 13), and make the text-color white, and grey for placeholder.
 	m_input->setStyleSheet(
-		"border-radius: 8px; background-color: rgb(12, 12, 13); color: white; placeholder-color: grey;");
+		"border-radius: 8px; background-color: rgb(12, 12, 13); color: white;");
 
 	m_layout->setSpacing(0);
 	m_layout->setContentsMargins(0, 0, 0, 0);

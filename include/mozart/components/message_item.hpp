@@ -1,11 +1,10 @@
 #ifndef MOZART_COMPONENTS_MESSAGE_ITEM_HPP
 #define MOZART_COMPONENTS_MESSAGE_ITEM_HPP
 
+#include <QBoxLayout>
+#include <QDateTime>
 #include <mozart/components/clickable_label.hpp>
 #include <mozart/components/widget.hpp>
-#include <qboxlayout.h>
-#include <qdatetime.h>
-#include <qlabel.h>
 
 namespace mozart
 {
@@ -20,6 +19,7 @@ struct MessageItem : Widget {
 	void setup_ui();
 	void enterEvent(QEvent *event) override;
 	void leaveEvent(QEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 
 	QHBoxLayout *m_layout{ new QHBoxLayout(this) };
 	QVBoxLayout *m_vertical_layout{ new QVBoxLayout() };

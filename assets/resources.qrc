@@ -28,6 +28,7 @@
     <file>icons/text.svg</file>
     <file>icons/text_limited.svg</file>
     <file>icons/voice.svg</file>
+    <file>icons/add.svg</file>
     <file>images/logo.png</file>
     <file>images/mozart.png</file>
   </qresource>

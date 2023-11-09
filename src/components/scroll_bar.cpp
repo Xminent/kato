@@ -61,7 +61,6 @@ ScrollBar::ScrollBar(Qt::Orientation orientation, QWidget *parent)
 		"}"
 		"QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {"
 		"    background: none;"
-		"}"
 		"}");
 }
 } // namespace mozart

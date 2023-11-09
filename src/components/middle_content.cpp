@@ -21,11 +21,8 @@ MiddleContent::MiddleContent(uint64_t id, const QString &name, QWidget *parent)
 
 void MiddleContent::add_message(const QString &message)
 {
-	static int count{};
-
-	auto *label = new MessageItem{ "Xminent", message, this };
-
-	m_messages_layout->addWidget(label);
+	m_messages_layout->addWidget(
+		new MessageItem{ "Anonymous", message, this });
 }
 
 void MiddleContent::setup_ui()
