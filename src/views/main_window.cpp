@@ -16,6 +16,7 @@ constexpr uint16_t API_PORT{ 8080 };
 constexpr uint16_t AUDIO_PORT{ 9090 };
 
 #ifdef Q_OS_WIN
+// NOLINTNEXTLINE
 mozart::MainWindow *main_window_instance{};
 #endif
 } // namespace
@@ -26,16 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow{ parent }
 {
 	m_udp_socket->bind(QHostAddress::LocalHost);
-	m_ws.open(QUrl{ QString{ "ws://localhost:%1/gateway" }.arg(API_PORT) });
 
-	// Look for channels.
-	QNetworkRequest req{ QUrl{
-		QString{ "http://localhost:%1/api/channels" }.arg(API_PORT) } };
-	auto *reply = m_network_manager->get(req);
-
-	connect(reply, &QNetworkReply::finished,
-		[this, reply] { handle_get_channels(reply); });
-
+	connect_to_gateway();
 	setup_signals();
 	setup_audio();
 	setup_ui();
@@ -65,9 +58,8 @@ void MainWindow::setup_audio()
 	m_format.setByteOrder(QAudioFormat::LittleEndian);
 	m_format.setSampleType(QAudioFormat::UnSignedInt);
 
-	QAudioDeviceInfo info{QAudioDeviceInfo::defaultOutputDevice()};
 
-    if (!info.isFormatSupported(m_format)) {
+    if (QAudioDeviceInfo info{QAudioDeviceInfo::defaultOutputDevice()}; !info.isFormatSupported(m_format)) {
 		qWarning()
 			<< "Default format not supported, trying to use nearest.";
 		m_format = info.nearestFormat(m_format);
@@ -134,8 +126,9 @@ void MainWindow::setup_signals()
 	connect(m_left_sidebar, &LeftSidebar::create_channel, this, [this] {
 		static int count{};
 
+		auto *label = new QLabel{ QString("Channel %1").arg(++count) };
 		m_modal = std::make_unique<Modal>(
-			QString("Create channel %1").arg(++count), this);
+			QString("Create channel %1").arg(++count), label, this);
 		m_modal->move_to_center();
 		m_modal->show();
 	});
@@ -147,7 +140,7 @@ void MainWindow::setup_signals()
 
 	connect(&m_ws, &QWebSocket::disconnected, this, [this] {
 		qDebug() << "disconnected";
-		m_ws.open(QUrl{ "ws://localhost:8080" });
+		connect_to_gateway();
 	});
 
 	connect(&m_ws, &QWebSocket::textMessageReceived, this,
@@ -357,6 +350,19 @@ void MainWindow::set_middle_content(MiddleContent *content)
 		m_central_layout->insertWidget(2, m_middle_content);
 		m_middle_content->show();
 	}
+}
+
+void MainWindow::connect_to_gateway()
+{
+	m_ws.open(QUrl{ QString{ "ws://localhost:%1/gateway" }.arg(API_PORT) });
+
+	// Look for channels.
+	QNetworkRequest req{ QUrl{
+		QString{ "http://localhost:%1/api/channels" }.arg(API_PORT) } };
+	auto *reply = m_network_manager->get(req);
+
+	connect(reply, &QNetworkReply::finished,
+		[this, reply] { handle_get_channels(reply); });
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

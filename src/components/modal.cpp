@@ -7,10 +7,15 @@
 
 namespace mozart
 {
-Modal::Modal(const QString &title, QWidget *parent)
+Modal::Modal(const QString &title, QWidget *child, QWidget *parent)
 	: Widget{ parent }
+	, m_child{ child }
 	, m_title{ new QLabel(title, this) }
 {
+	if (m_child != nullptr) {
+		m_child->setParent(this);
+	}
+
 	setup_ui();
 	connect(m_close_button, &ClickableLabel::clicked, this, &Modal::close);
 	move_to_center();
@@ -107,6 +112,10 @@ void Modal::setup_ui()
 	m_content_layout->setContentsMargins(0, 0, 0, 0);
 	m_content_layout->setSpacing(0);
 	m_content_layout->addWidget(m_header, 0, Qt::AlignTop);
+
+	if (m_child != nullptr) {
+		m_content_layout->addWidget(m_child);
+	}
 
 	m_layout->setContentsMargins(0, 0, 0, 0);
 	m_layout->setSpacing(0);
