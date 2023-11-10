@@ -31,6 +31,7 @@ void NavBarItem::unclick()
 
 void NavBarItem::setup_ui()
 {
+	setCursor(Qt::PointingHandCursor);
 	setFixedSize(72, 48);
 	set_background_color(Qt::transparent);
 

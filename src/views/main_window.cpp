@@ -2,16 +2,18 @@
 #include <QFontDatabase>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QNetworkReply>
+#include <QStackedWidget>
 #include <mozart/api/win_dark.hpp>
 #include <mozart/defer.hpp>
 #include <mozart/views/main_window.hpp>
-#include <qnetworkreply.h>
-#include <qnetworkrequest.h>
 
 namespace
 {
 constexpr QSize WINDOW_SIZE{ 800, 600 };
 constexpr QSize MIN_WINDOW_SIZE{ 940, 500 };
+constexpr uint16_t API_PORT{ 8080 };
+constexpr uint16_t AUDIO_PORT{ 9090 };
 
 #ifdef Q_OS_WIN
 mozart::MainWindow *main_window_instance{};
@@ -24,10 +26,11 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow{ parent }
 {
 	m_udp_socket->bind(QHostAddress::LocalHost);
-	m_ws.open(QUrl{ "ws://localhost:8080/gateway" });
+	m_ws.open(QUrl{ QString{ "ws://localhost:%1/gateway" }.arg(API_PORT) });
 
 	// Look for channels.
-	QNetworkRequest req{ QUrl{ "http://localhost:8080/api/channels" } };
+	QNetworkRequest req{ QUrl{
+		QString{ "http://localhost:%1/api/channels" }.arg(API_PORT) } };
 	auto *reply = m_network_manager->get(req);
 
 	connect(reply, &QNetworkReply::finished,
@@ -48,24 +51,53 @@ void MainWindow::setup_audio()
 {
 	QAudioEncoderSettings settings;
 	settings.setCodec("audio/pcm");
+	settings.setSampleRate(48'000);
+	settings.setChannelCount(2);
 	settings.setQuality(QMultimedia::HighQuality);
 
-	m_audio_input->setEncodingSettings(settings);
+	m_audio_recorder->setEncodingSettings(settings);
+	m_buffer->open(QIODevice::ReadWrite);
 
-	[[maybe_unused]] const auto worked =
-		m_audio_probe->setSource(m_audio_input);
+	m_format.setSampleRate(48'000);
+	m_format.setChannelCount(2);
+	m_format.setSampleSize(16);
+	m_format.setCodec("audio/pcm");
+	m_format.setByteOrder(QAudioFormat::LittleEndian);
+	m_format.setSampleType(QAudioFormat::UnSignedInt);
 
-	Q_ASSERT(worked);
+	QAudioDeviceInfo info{QAudioDeviceInfo::defaultOutputDevice()};
+
+    if (!info.isFormatSupported(m_format)) {
+		qWarning()
+			<< "Default format not supported, trying to use nearest.";
+		m_format = info.nearestFormat(m_format);
+    }
+
+	m_audio_input = new QAudioInput(m_format, this);
+	m_audio_output = new QAudioOutput(m_format, this);
+	// m_audio_output->start();
+	m_audio_probe->start(m_audio_input);
+	m_audio_input->start(m_audio_probe);
+	m_audio_output->start(m_buffer);
 }
 
 void MainWindow::setup_signals()
 {
-	connect(m_audio_probe, &QAudioProbe::audioBufferProbed, this,
-		[this](QAudioBuffer buf) {
-			// Send audio to the server.
+	// connect(m_audio_probe, &QAudioProbe::audioBufferProbed, this,
+	// 	[this](QAudioBuffer buf) {
+	// 		// Send audio to the server.
+	// 		m_udp_socket->writeDatagram(
+	// 			reinterpret_cast<const char *>(buf.data()),
+	// 			buf.byteCount(), QHostAddress::LocalHost,
+	// 			AUDIO_PORT);
+	// 	});
+
+	connect(m_audio_probe, &AudioProbeDevice::audio_available, this,
+		[this](const QAudioBuffer &buf) {
 			m_udp_socket->writeDatagram(
 				reinterpret_cast<const char *>(buf.data()),
-				buf.byteCount(), QHostAddress::LocalHost, 8080);
+				buf.byteCount(), QHostAddress::LocalHost,
+				AUDIO_PORT);
 		});
 
 	connect(m_udp_socket, &QUdpSocket::readyRead, this, [this] {
@@ -76,7 +108,18 @@ void MainWindow::setup_signals()
 			m_udp_socket->readDatagram(datagram.data(),
 						   datagram.size());
 
-			// Play the audio.
+			if (datagram.isEmpty()) {
+				continue;
+			}
+
+			QAudioBuffer buf{ datagram, m_format };
+
+			qDebug() << "Received datagram of size: "
+				 << datagram.size();
+
+			m_buffer->write(
+				reinterpret_cast<const char *>(buf.data()),
+				buf.byteCount());
 		}
 	});
 
@@ -87,6 +130,15 @@ void MainWindow::setup_signals()
 		[this](const ChannelItem *channel) {
 			set_middle_content(m_middle_contents[channel->id()]);
 		});
+
+	connect(m_left_sidebar, &LeftSidebar::create_channel, this, [this] {
+		static int count{};
+
+		m_modal = std::make_unique<Modal>(
+			QString("Create channel %1").arg(++count), this);
+		m_modal->move_to_center();
+		m_modal->show();
+	});
 
 	connect(&m_ws, &QWebSocket::connected, this, [this] {
 		qDebug() << "connected";
@@ -135,10 +187,7 @@ void MainWindow::setup_ui()
 
 	QFontDatabase::addApplicationFont(":/fonts/Inter.ttf");
 
-	QFont font;
-	font.setFamily("Inter");
-	font.setPointSize(14);
-	setFont(font);
+	setFont(QFont{ "Inter", 10 });
 
 	m_central_layout->setContentsMargins(0, 0, 0, 0);
 	m_central_layout->setSpacing(0);
@@ -307,6 +356,13 @@ void MainWindow::set_middle_content(MiddleContent *content)
 	if (m_middle_content != nullptr) {
 		m_central_layout->insertWidget(2, m_middle_content);
 		m_middle_content->show();
+	}
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+	if (m_modal) {
+		m_modal->move_to_center();
 	}
 }
 } // namespace mozart

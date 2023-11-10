@@ -20,21 +20,25 @@ ChannelItem::ChannelItem(uint64_t id, const QString &name, QWidget *parent)
 
 void ChannelItem::setup_ui()
 {
-	QFont font;
-	font.setFamily("Inter");
-	font.setPointSize(12);
-	setFont(font);
-
+	setCursor(Qt::PointingHandCursor);
+	setFont([this] {
+		auto f = font();
+		f.setBold(true);
+		return f;
+	}());
 	setFixedSize(224, 34);
 	set_background_color(Qt::transparent);
 	set_text_color(QColor(142, 146, 151));
-	icon->set_background_color(Qt::transparent);
-	icon->setFixedSize(QSize(20, 20));
-	icon->set_image(":/icons/text.svg");
-	layout->addWidget(icon, 0, Qt::AlignVCenter);
-	label->setText(m_name);
-	layout->addWidget(label, 0, Qt::AlignVCenter);
-	layout->addSpacerItem(spacer);
+
+	m_icon->set_background_color(Qt::transparent);
+	m_icon->setFixedSize(QSize(20, 20));
+	m_icon->set_image(":/icons/text.svg");
+
+	m_label->setText(m_name);
+
+	m_layout->addWidget(m_icon, 0, Qt::AlignVCenter);
+	m_layout->addWidget(m_label, 0, Qt::AlignVCenter);
+	m_layout->addSpacerItem(m_spacer);
 }
 
 void ChannelItem::set_clicked(bool clicked)

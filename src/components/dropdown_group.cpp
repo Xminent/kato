@@ -34,6 +34,7 @@ DropdownGroup::DropdownGroup(const QString &text, QWidget *parent)
 
 void DropdownGroup::setup_ui()
 {
+	setCursor(Qt::PointingHandCursor);
 	setFixedHeight(24);
 
 	m_arrow->setPixmap(QPixmap(":/icons/arrow.svg"));
@@ -42,6 +43,12 @@ void DropdownGroup::setup_ui()
 
 	m_text->set_text_alignment(Qt::AlignLeft);
 	m_text->set_text_color(QColor(142, 146, 151));
+	m_text->setFont([this] {
+		auto f = font();
+		f.setBold(true);
+		f.setPointSize(9);
+		return f;
+	}());
 
 	m_icon->setPixmap(QPixmap(":/icons/add.svg"));
 	m_icon->setScaledContents(true);

@@ -14,7 +14,6 @@
 
 namespace winDark
 {
-void setDark_qApp();
 void setDark_Titlebar(HWND hwnd);
 bool isDarkTheme();
 

@@ -7,8 +7,6 @@ int main(int argc, char *argv[])
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 	QApplication app(argc, argv);
 
-	// winDark::setDark_qApp();
-
 	mozart::MainWindow window;
 	window.show();
 

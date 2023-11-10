@@ -1,6 +1,6 @@
+#include <QDebug>
 #include <QDesktopServices>
 #include <mozart/components/message_item.hpp>
-#include <qdebug.h>
 
 namespace mozart
 {
@@ -46,7 +46,6 @@ void MessageItem::setup_ui()
 		label->setTextInteractionFlags(Qt::TextSelectableByMouse);
 		label->setWordWrap(true);
 		label->setAlignment(Qt::AlignLeft);
-		label->setFont(QFont{ "Inter", 10 });
 	}
 
 	for (auto *layout : { m_layout, m_horizontal_layout }) {
@@ -54,21 +53,38 @@ void MessageItem::setup_ui()
 		layout->setSpacing(0);
 	}
 
-	m_author_label->setFont(QFont{ "Inter", 10, QFont::Bold });
+	m_author_label->setFont([this] {
+		auto f = font();
+		f.setBold(true);
+		return f;
+	}());
 	m_author_label->setCursor(Qt::PointingHandCursor);
-	m_date_label->setFont(QFont{ "Inter", 8 });
-	m_date_label->setStyleSheet("color: gray;");
+
+	m_date_label->setFont([this] {
+		auto f = font();
+		f.setPointSize(8);
+		return f;
+	}());
+
+	m_date_label->setPalette([this] {
+		auto p = m_date_label->palette();
+		p.setColor(QPalette::WindowText, Qt::gray);
+		return p;
+	}());
+
 	m_message_label->setCursor(Qt::IBeamCursor);
 	m_message_label->setTextFormat(Qt::TextFormat::PlainText);
 
 	// If the message is a link, we set the color to blue and make it clickable, so it opens external links.
 	if (m_message.startsWith("http://") ||
 	    m_message.startsWith("https://")) {
-		QPalette palette;
-		palette.setColor(QPalette::Link, QColor{ 0, 168, 252 });
-		m_message_label->setPalette(palette);
+		m_message_label->setPalette([this] {
+			auto p = m_message_label->palette();
+			// p.setColor(QPalette::Link, QColor{ 0, 168, 252 });
+			p.setColor(QPalette::Link, Qt::green);
+			return p;
+		}());
 		m_message_label->setStyleSheet("text-decoration: none;");
-		m_message_label->setFont(QFont{ "Inter", 10, QFont::Bold });
 		const auto new_text =
 			QString("<a href='%1'>%2</a>").arg(m_message, m_message);
 
@@ -83,10 +99,10 @@ void MessageItem::setup_ui()
 			Qt::TextSelectableByMouse);
 	}
 
-	m_horizontal_layout->addWidget(m_author_label);
+	m_horizontal_layout->addWidget(m_author_label, 0, Qt::AlignVCenter);
 	m_horizontal_layout->addSpacerItem(new QSpacerItem(
 		8, 0, QSizePolicy::Fixed, QSizePolicy::Minimum));
-	m_horizontal_layout->addWidget(m_date_label);
+	m_horizontal_layout->addWidget(m_date_label, 0, Qt::AlignVCenter);
 	m_horizontal_layout->addSpacerItem(new QSpacerItem(
 		0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 

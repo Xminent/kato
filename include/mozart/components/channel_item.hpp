@@ -36,14 +36,14 @@ struct ChannelItem : Widget {
 	// Widgets
 
 	/// Generic horizontal layout.
-	QHBoxLayout *layout{ new QHBoxLayout(this) };
+	QHBoxLayout *m_layout{ new QHBoxLayout(this) };
 	/// Widget for holding the channel type icon.
-	Widget *icon{ new Widget(this) };
+	Widget *m_icon{ new Widget(this) };
 	/// Label for holding the channel name.
-	QLabel *label{ new QLabel(this) };
+	QLabel *m_label{ new QLabel(this) };
 	/// Spacer for keeping items aligned.
-	QSpacerItem *spacer{ new QSpacerItem(0, 0, QSizePolicy::Expanding,
-					     QSizePolicy::Minimum) };
+	QSpacerItem *m_spacer{ new QSpacerItem(0, 0, QSizePolicy::Expanding,
+					       QSizePolicy::Minimum) };
 
 	// Metadata
 

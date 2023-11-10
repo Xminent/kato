@@ -1,6 +1,4 @@
 #include <mozart/components/header.hpp>
-#include <qlabel.h>
-#include <qnamespace.h>
 
 namespace mozart
 {
@@ -22,7 +20,12 @@ void Header::setup_ui()
 
 	m_text = new QLabel{ m_name, this };
 	m_text->setAlignment(Qt::AlignLeft);
-	m_text->setFont(QFont{ "Inter", 12, QFont::Bold });
+	m_text->setFont([this] {
+		auto f = font();
+		f.setBold(true);
+		f.setPointSize(11);
+		return f;
+	}());
 
 	m_layout->setSpacing(0);
 	m_layout->setContentsMargins(0, 0, 0, 0);

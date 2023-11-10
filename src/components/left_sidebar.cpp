@@ -1,4 +1,3 @@
-#include "mozart/components/clickable_label.hpp"
 #include <QWheelEvent>
 #include <mozart/components/left_sidebar.hpp>
 #include <qdebug.h>
@@ -19,12 +18,12 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 		// } else {
 		// 	m_text_channels->open();
 		// }
-
-		qDebug() << "toggle channels";
 	});
 
-	connect(m_text_channels, &DropdownGroup::add, this,
-		[this] { qDebug() << "show add channel modal"; });
+	connect(m_text_channels, &DropdownGroup::add, this, [this] {
+		qDebug() << "show add channel modal";
+		emit create_channel();
+	});
 }
 
 void LeftSidebar::set_channels(const std::map<uint64_t, QString> &channels)
@@ -56,13 +55,14 @@ void LeftSidebar::setup_ui()
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBar(m_scroll_bar);
 
-	m_text_channels->setFont(QFont{ "Inter", 10, QFont::Bold });
-
 	m_layout->setContentsMargins(0, 0, 0, 0);
 	m_layout->setSpacing(0);
 	m_layout->addWidget(m_header);
 	m_layout->addWidget(m_text_channels);
 	m_layout->addLayout(m_channel_layout);
+	m_layout->addSpacerItem(new QSpacerItem(0, 16, QSizePolicy::Minimum,
+						QSizePolicy::Fixed));
+	m_layout->addWidget(m_voice_channels);
 	m_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum,
 						QSizePolicy::Expanding));
 }

@@ -33,10 +33,8 @@ void Form::setup_ui()
 
 	m_input->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 	m_input->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
 	m_input->setPlaceholderText(QString{ "Message #%1" }.arg(m_name));
 	m_input->setFrameShape(QFrame::NoFrame);
-	m_input->setFont(QFont("Inter", 11));
 	m_input->setMinimumHeight(44);
 	m_input->setStyleSheet(
 		"border-radius: 8px; background-color: rgb(12, 12, 13); color: white;");

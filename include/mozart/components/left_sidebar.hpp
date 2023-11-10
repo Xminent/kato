@@ -21,6 +21,7 @@ struct LeftSidebar : QScrollArea {
 
     signals:
 	void channel_selected(ChannelItem *channel);
+	void create_channel();
 
     private:
 	void setup_ui();
@@ -35,8 +36,10 @@ struct LeftSidebar : QScrollArea {
 	Header *m_header{};
 
 	QVBoxLayout *m_channel_layout{ new QVBoxLayout() };
-	DropdownGroup *m_text_channels{ new DropdownGroup("Text Channels",
+	DropdownGroup *m_text_channels{ new DropdownGroup("TEXT CHANNELS",
 							  this) };
+	DropdownGroup *m_voice_channels{ new DropdownGroup("VOICE CHANNELS",
+							   this) };
 
 	/// Used to store the scroll bar.
 	SmoothScrollBar *m_scroll_bar{ new SmoothScrollBar(Qt::Vertical,
