@@ -20,7 +20,8 @@ class MiddleContent : public Widget {
 		return m_id;
 	}
 
-	void add_message(const QString &message);
+	void add_message(const QString &avatar, const QString &author,
+			 const QString &message);
 
     signals:
 	void message_sent(const QString &message);

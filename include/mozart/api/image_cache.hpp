@@ -1,35 +1,30 @@
 #ifndef MOZART_API_IMAGE_CACHE_HPP
 #define MOZART_API_IMAGE_CACHE_HPP
+
 #include <QFile>
 #include <QNetworkAccessManager>
 #include <QStandardPaths>
+#include <optional>
 
 namespace mozart
 {
-class ImageCache {
-    public:
-	[[nodiscard]] static bool contains(const QString &filename)
-	{
-		return !filename.isEmpty() && QFile::exists(get_path(filename));
-	}
+struct ImageCache {
+	[[nodiscard]] static bool contains(const QString &filename);
+	[[nodiscard]] static QString get_path(const QString &filename);
+	[[nodiscard]] static std::optional<QPixmap>
+	get_image(const QString &filename);
+	static void cache_image(const QUrl &url,
+				const std::function<void(const QPixmap &)> &cb);
+	static void remove_image(const QString &filename);
+	static void download(const QUrl &url,
+			     const std::function<void(const QPixmap &)> &cb);
 
-	[[nodiscard]] static QString get_path(const QString &filename)
-	{
-		return QStandardPaths::writableLocation(
-			       QStandardPaths::AppDataLocation) +
-		       "/cache/" + filename;
-	}
-
-	static void cache_images(const std::vector<QUrl> &urls);
+	static const QString &cache_directory();
 
     private:
 	explicit ImageCache() = default;
 
-	[[nodiscard]] static ImageCache &instance()
-	{
-		static ImageCache instance;
-		return instance;
-	}
+	[[nodiscard]] static ImageCache &instance();
 
 	QNetworkAccessManager m_downloader;
 };

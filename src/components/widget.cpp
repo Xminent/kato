@@ -419,17 +419,18 @@ void Widget::paintEvent([[maybe_unused]] QPaintEvent *event)
 	}
 
 	if (!m_pixmap.isNull()) {
-		const auto [pm_width, pm_height] =
-			std::make_pair(m_pixmap.width(), m_pixmap.height());
+		const auto scaled_width = qMin(width, height);
+		const auto scaled_height = static_cast<int>(
+			(static_cast<qreal>(scaled_width) / m_pixmap.width()) *
+			m_pixmap.height());
+		const auto y = (height - scaled_height) / 2;
 
+		painter.setRenderHint(QPainter::Antialiasing, true);
 		painter.setClipPath(inner_path);
-		painter.drawPixmap(
-			QRect{ (pm_width < width ? (width - pm_width) / 2 : 0),
-			       (pm_height < height ? (height - pm_height) / 2 :
-						     0),
-			       (pm_width < width ? pm_width : width),
-			       (pm_height < height ? pm_height : height) },
-			m_pixmap);
+		painter.drawPixmap(QRect(0, y, scaled_width, scaled_height),
+				   m_pixmap.scaled(scaled_width, scaled_height,
+						   Qt::KeepAspectRatio,
+						   Qt::SmoothTransformation));
 
 	} else if (!m_img.isNull()) {
 		const auto [img_width, img_height] =

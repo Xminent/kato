@@ -19,10 +19,11 @@ MiddleContent::MiddleContent(uint64_t id, const QString &name, QWidget *parent)
 		&MiddleContent::message_sent);
 }
 
-void MiddleContent::add_message(const QString &message)
+void MiddleContent::add_message(const QString &avatar, const QString &author,
+				const QString &message)
 {
 	m_messages_layout->addWidget(
-		new MessageItem{ "Anonymous", message, this });
+		new MessageItem{ avatar, author, message, this });
 }
 
 void MiddleContent::setup_ui()

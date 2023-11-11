@@ -12,8 +12,8 @@ struct MessageItem : Widget {
 	Q_OBJECT
 
     public:
-	explicit MessageItem(const QString &author, const QString &message,
-			     QWidget *parent = nullptr);
+	explicit MessageItem(const QString &avatar, const QString &author,
+			     const QString &message, QWidget *parent = nullptr);
 
     private:
 	void setup_ui();
@@ -25,7 +25,6 @@ struct MessageItem : Widget {
 	QVBoxLayout *m_vertical_layout{ new QVBoxLayout() };
 	QHBoxLayout *m_horizontal_layout{ new QHBoxLayout() };
 
-	QString m_avatar;
 	QString m_author;
 	QDateTime m_date;
 	QString m_message;

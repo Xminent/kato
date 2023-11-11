@@ -36,12 +36,13 @@ struct MainWindow : QMainWindow {
 	void setup_audio();
 	void setup_signals();
 	void setup_ui();
-	void send_message(const QString &message);
+	void create_message(const QString &message);
 	void handle_gateway_event(const QJsonObject &json);
 	void handle_get_channels(QNetworkReply *reply);
 	void add_middle_content(uint64_t id, const QString &name);
 	void set_middle_content(MiddleContent *content);
 	void connect_to_gateway();
+	void identify();
 	void resizeEvent(QResizeEvent *event) override;
 
 	QWidget *m_central_widget{ new QWidget(this) };
@@ -74,6 +75,10 @@ struct MainWindow : QMainWindow {
 
 	// Websocket setup.
 	QWebSocket m_ws;
+	// Name acquired from authenticating.
+	QString m_name;
+	// Token provided at runtime/startup.
+	QString m_token;
 
 	// Http setup.
 	QNetworkAccessManager *m_network_manager{ new QNetworkAccessManager(

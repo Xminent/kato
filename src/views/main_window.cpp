@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QNetworkReply>
+#include <QProcessEnvironment>
 #include <QStackedWidget>
 #include <mozart/api/win_dark.hpp>
 #include <mozart/defer.hpp>
@@ -19,6 +20,12 @@ constexpr uint16_t AUDIO_PORT{ 9090 };
 // NOLINTNEXTLINE
 mozart::MainWindow *main_window_instance{};
 #endif
+
+enum class GatewayOpcode : uint8_t {
+	Ready = 1,
+	MessageCreate = 2,
+	ChannelCreate = 3,
+};
 } // namespace
 
 namespace mozart
@@ -26,6 +33,10 @@ namespace mozart
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow{ parent }
 {
+	m_token = QProcessEnvironment::systemEnvironment().value("SHIKI_TOKEN");
+
+	Q_ASSERT(!m_token.isEmpty());
+
 	m_udp_socket->bind(QHostAddress::LocalHost);
 
 	connect_to_gateway();
@@ -135,11 +146,11 @@ void MainWindow::setup_signals()
 
 	connect(&m_ws, &QWebSocket::connected, this, [this] {
 		qDebug() << "connected";
-		send_message("Hello world");
+		identify();
 	});
 
 	connect(&m_ws, &QWebSocket::disconnected, this, [this] {
-		qDebug() << "disconnected";
+		qDebug() << "disconnected: close code: " << m_ws.closeCode();
 		connect_to_gateway();
 	});
 
@@ -192,22 +203,28 @@ void MainWindow::setup_ui()
 	setCentralWidget(m_central_widget);
 }
 
-void MainWindow::send_message(const QString &message)
+void MainWindow::create_message(const QString &message)
 {
+	if (m_middle_content == nullptr) {
+		return;
+	}
+
 	QJsonObject data{
 		{ "content", message },
 	};
 	QJsonDocument doc{ data };
 
-	auto url =
-		QString{ "http://localhost:8080/api/channels/%1/messages" }.arg(
-			m_middle_content->id());
+	auto url = QString{ "http://localhost:%1/api/channels/%2/messages" }
+			   .arg(API_PORT)
+			   .arg(m_middle_content->id());
 
 	qDebug() << "Sending: " << doc.toJson(QJsonDocument::Compact) << " to "
 		 << url;
 
 	auto req = QNetworkRequest{ QUrl{ url } };
 
+	req.setRawHeader("Authorization",
+			 QString{ "Bearer %1" }.arg(m_token).toUtf8());
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
 	auto *reply = m_network_manager->post(
@@ -238,19 +255,53 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 	const auto op = op_it->toInt();
 	const auto d = d_it->toObject();
 
-	switch (op) {
-	case 2: {
-		const auto content = d.find("content");
+	switch (static_cast<GatewayOpcode>(op)) {
+	case GatewayOpcode::Ready: {
+		const auto name_it = d.find("name");
 
-		if (content == d.end() || !content->isString()) {
+		if (name_it == d.end() || !name_it->isString()) {
 			qDebug() << "Invalid JSON: " << d;
 			return;
 		}
 
-		m_middle_content->add_message(content->toString());
+		m_name = name_it->toString();
+		qDebug() << "Setting name to: " << m_name;
+
+		create_message("Hello world");
 		break;
 	}
-	case 3: {
+	case GatewayOpcode::MessageCreate: {
+		const auto author_it = d.find("author");
+		const auto content_it = d.find("content");
+
+		if (author_it == d.end() || !author_it->isObject() ||
+		    content_it == d.end() || !content_it->isString()) {
+			qDebug() << "Invalid JSON: " << d;
+			return;
+		}
+
+		const auto author = author_it->toObject();
+		const auto author_name_it = author.find("username");
+		const auto avatar_it = author.find("avatar");
+
+		if (author_name_it == author.end() ||
+		    !author_name_it->isString() || avatar_it == author.end()) {
+			qDebug() << "Invalid JSON: " << d;
+			return;
+		}
+
+		QString avatar;
+
+		if (avatar_it->isString()) {
+			avatar = avatar_it->toString();
+		}
+
+		m_middle_content->add_message(avatar,
+					      author_name_it->toString(),
+					      content_it->toString());
+		break;
+	}
+	case GatewayOpcode::ChannelCreate: {
 		const auto id_it = d.find("id");
 		const auto name_it = d.find("name");
 
@@ -281,7 +332,7 @@ void MainWindow::handle_get_channels(QNetworkReply *reply)
 	};
 
 	if (reply->error() != QNetworkReply::NoError) {
-		qDebug() << "Error: " << reply->errorString();
+		qDebug() << "Error fetching channels: " << reply->errorString();
 		return;
 	}
 
@@ -316,6 +367,8 @@ void MainWindow::handle_get_channels(QNetworkReply *reply)
 		}
 	}
 
+	qDebug() << "Got channels: " << m_channels;
+
 	// Set the channels in the left sidebar.
 	m_left_sidebar->set_channels(m_channels);
 }
@@ -330,7 +383,7 @@ void MainWindow::add_middle_content(uint64_t id, const QString &name)
 	m_middle_contents.emplace(id, middle_content);
 
 	connect(middle_content, &MiddleContent::message_sent, this,
-		[this](const QString &message) { send_message(message); });
+		[this](const QString &message) { create_message(message); });
 }
 
 void MainWindow::set_middle_content(MiddleContent *content)
@@ -359,10 +412,30 @@ void MainWindow::connect_to_gateway()
 	// Look for channels.
 	QNetworkRequest req{ QUrl{
 		QString{ "http://localhost:%1/api/channels" }.arg(API_PORT) } };
+	req.setRawHeader("Authorization",
+			 QString{ "Bearer %1" }.arg(m_token).toUtf8());
+
+	for (const auto &key : req.rawHeaderList()) {
+		qDebug() << key << ":" << req.rawHeader(key);
+	}
+
 	auto *reply = m_network_manager->get(req);
 
 	connect(reply, &QNetworkReply::finished,
 		[this, reply] { handle_get_channels(reply); });
+}
+
+void MainWindow::identify()
+{
+	if (m_token.isEmpty()) {
+		return;
+	}
+
+	QJsonObject data{ { "token", m_token } };
+	QJsonObject obj{ { "op", 0 }, { "d", data } };
+	QJsonDocument doc{ obj };
+
+	m_ws.sendTextMessage(doc.toJson(QJsonDocument::Compact));
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

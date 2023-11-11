@@ -1,11 +1,13 @@
+#include "mozart/api/image_cache.hpp"
 #include <QDebug>
 #include <QDesktopServices>
+#include <mozart/api/file_downloader.hpp>
 #include <mozart/components/message_item.hpp>
 
 namespace mozart
 {
-MessageItem::MessageItem(const QString &author, const QString &message,
-			 QWidget *parent)
+MessageItem::MessageItem(const QString &avatar, const QString &author,
+			 const QString &message, QWidget *parent)
 	: Widget{ parent }
 	, m_author{ author }
 	, m_date{ QDateTime::currentDateTime() }
@@ -28,6 +30,10 @@ MessageItem::MessageItem(const QString &author, const QString &message,
 		auto f = m_author_label->font();
 		f.setUnderline(false);
 		m_author_label->setFont(f);
+	});
+
+	ImageCache::download(QUrl{ avatar }, [this](const auto &pixmap) {
+		m_avatar_label->set_pixmap(pixmap);
 	});
 }
 
