@@ -6,7 +6,6 @@
 #include <QProcessEnvironment>
 #include <QStackedWidget>
 #include <mozart/api/win_dark.hpp>
-#include <mozart/defer.hpp>
 #include <mozart/views/main_window.hpp>
 
 namespace
@@ -257,16 +256,25 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 
 	switch (static_cast<GatewayOpcode>(op)) {
 	case GatewayOpcode::Ready: {
-		const auto name_it = d.find("name");
+		const auto user_it = d.find("user");
+		const auto channels_it = d.find("channels");
 
-		if (name_it == d.end() || !name_it->isString()) {
+		if (user_it == d.end() || !user_it->isObject() ||
+		    channels_it == d.end() || !channels_it->isArray()) {
 			qDebug() << "Invalid JSON: " << d;
 			return;
 		}
 
-		m_name = name_it->toString();
-		qDebug() << "Setting name to: " << m_name;
+		const auto user = user_it->toObject();
+		const auto username_it = user.find("username");
 
+		if (username_it == user.end() || !username_it->isString()) {
+			qDebug() << "Invalid JSON: " << d;
+		}
+
+		m_name = username_it->toString();
+		qDebug() << "Setting name to: " << m_name;
+		handle_get_channels(channels_it->toArray());
 		create_message("Hello world");
 		break;
 	}
@@ -324,27 +332,8 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 	}
 }
 
-void MainWindow::handle_get_channels(QNetworkReply *reply)
+void MainWindow::handle_get_channels(const QJsonArray &channels)
 {
-	defer
-	{
-		reply->deleteLater();
-	};
-
-	if (reply->error() != QNetworkReply::NoError) {
-		qDebug() << "Error fetching channels: " << reply->errorString();
-		return;
-	}
-
-	const auto res = reply->readAll();
-	const auto json = QJsonDocument::fromJson(res);
-
-	if (!json.isArray()) {
-		return;
-	}
-
-	const auto channels = json.array();
-
 	for (const auto &channel : channels) {
 		const auto obj = channel.toObject();
 		const auto id_it = obj.find("id");
@@ -408,21 +397,6 @@ void MainWindow::set_middle_content(MiddleContent *content)
 void MainWindow::connect_to_gateway()
 {
 	m_ws.open(QUrl{ QString{ "ws://localhost:%1/gateway" }.arg(API_PORT) });
-
-	// Look for channels.
-	QNetworkRequest req{ QUrl{
-		QString{ "http://localhost:%1/api/channels" }.arg(API_PORT) } };
-	req.setRawHeader("Authorization",
-			 QString{ "Bearer %1" }.arg(m_token).toUtf8());
-
-	for (const auto &key : req.rawHeaderList()) {
-		qDebug() << key << ":" << req.rawHeader(key);
-	}
-
-	auto *reply = m_network_manager->get(req);
-
-	connect(reply, &QNetworkReply::finished,
-		[this, reply] { handle_get_channels(reply); });
 }
 
 void MainWindow::identify()

@@ -38,7 +38,7 @@ struct MainWindow : QMainWindow {
 	void setup_ui();
 	void create_message(const QString &message);
 	void handle_gateway_event(const QJsonObject &json);
-	void handle_get_channels(QNetworkReply *reply);
+	void handle_get_channels(const QJsonArray &channels);
 	void add_middle_content(uint64_t id, const QString &name);
 	void set_middle_content(MiddleContent *content);
 	void connect_to_gateway();
