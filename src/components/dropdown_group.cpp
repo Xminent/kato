@@ -5,13 +5,20 @@ namespace kato
 {
 DropdownGroup::DropdownGroup(const QString &text, QWidget *parent)
 	: Widget{ parent }
-	, m_text{ new Widget(this) }
+	, m_text{ new ClickableLabel(text, this) }
 	, m_icon{ new ClickableLabel{ {}, this } }
 {
 	setup_ui();
-	m_text->set_text(text);
+
+	connect(m_text, &ClickableLabel::clicked, this,
+		[this, collapsed = false]() mutable {
+			collapsed = !collapsed;
+
+			m_arrow->set_rotation(collapsed ? 0 : -90, true);
+		});
 
 	connect(m_icon, &ClickableLabel::clicked, this, &DropdownGroup::add);
+
 	connect(m_icon, &ClickableLabel::on_enter, this, [this] {
 		auto pixmap = *m_icon->pixmap();
 
@@ -37,12 +44,14 @@ void DropdownGroup::setup_ui()
 	setCursor(Qt::PointingHandCursor);
 	setFixedHeight(24);
 
-	m_arrow->setPixmap(QPixmap(":/icons/arrow.svg"));
-	m_arrow->setScaledContents(true);
+	m_arrow->set_pixmap(QPixmap(":/icons/arrow.svg"));
 	m_arrow->setFixedSize(12, 12);
 
-	m_text->set_text_alignment(Qt::AlignLeft);
-	m_text->set_text_color(QColor(142, 146, 151));
+	m_text->setPalette([this] {
+		auto p = palette();
+		p.setColor(QPalette::WindowText, QColor(142, 146, 151));
+		return p;
+	}());
 	m_text->setFont([this] {
 		auto f = font();
 		f.setBold(true);
@@ -67,26 +76,34 @@ void DropdownGroup::setup_ui()
 
 void DropdownGroup::enterEvent(QEvent *event)
 {
-	auto pixmap = *m_arrow->pixmap();
+	auto pixmap = m_arrow->pixmap();
 
 	QPainter painter{ &pixmap };
 	painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
 	painter.fillRect(pixmap.rect(), Qt::white);
 
-	m_arrow->setPixmap(pixmap);
-	m_text->set_text_color(Qt::white);
+	m_arrow->set_pixmap(pixmap);
+	m_text->setPalette([this] {
+		auto p = palette();
+		p.setColor(QPalette::WindowText, Qt::white);
+		return p;
+	}());
 }
 
 void DropdownGroup::leaveEvent(QEvent *event)
 {
-	auto pixmap = *m_arrow->pixmap();
+	auto pixmap = m_arrow->pixmap();
 
 	QPainter painter{ &pixmap };
 	painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
 	painter.fillRect(pixmap.rect(), QColor(142, 146, 151));
 
-	m_arrow->setPixmap(pixmap);
-	m_text->set_text_color(QColor(142, 146, 151));
+	m_arrow->set_pixmap(pixmap);
+	m_text->setPalette([this] {
+		auto p = palette();
+		p.setColor(QPalette::WindowText, QColor(142, 146, 151));
+		return p;
+	}());
 }
 
 void DropdownGroup::mousePressEvent(QMouseEvent *event)

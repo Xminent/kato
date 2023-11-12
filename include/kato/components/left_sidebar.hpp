@@ -35,6 +35,8 @@ struct LeftSidebar : QScrollArea {
 	QString m_name;
 	Header *m_header{};
 
+	/// The currently focused channel.
+	std::optional<int> m_channel_idx;
 	QVBoxLayout *m_channel_layout{ new QVBoxLayout() };
 	DropdownGroup *m_text_channels{ new DropdownGroup("TEXT CHANNELS",
 							  this) };

@@ -13,6 +13,11 @@ namespace kato
 struct Widget : QWidget {
 	explicit Widget(QWidget *parent = nullptr);
 
+	[[nodiscard]] QPixmap pixmap() const
+	{
+		return m_pixmap;
+	}
+
 	void set_background_color(QColor color);
 	void set_border_color(QColor color);
 	void set_border_size(int size);
@@ -32,6 +37,7 @@ struct Widget : QWidget {
 	void set_text_alignment(int alignment);
 	void set_text_color(QColor color);
 	void set_font(QFont font);
+	void set_rotation(qreal degrees, bool animate = false);
 
     private:
 	void resizeEvent(QResizeEvent *e) override;
@@ -56,6 +62,7 @@ struct Widget : QWidget {
 	QString m_text;
 	int m_text_alignment{ Qt::AlignCenter };
 	QColor m_text_color;
+	qreal m_rotation{};
 };
 } // namespace kato
 

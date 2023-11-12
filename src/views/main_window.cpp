@@ -278,7 +278,6 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 		qDebug() << "Setting name to: " << m_name;
 		handle_get_channels(channels_it->toArray());
 		handle_get_users(users->toArray());
-		create_message("Hello world");
 		break;
 	}
 	case GatewayOpcode::MessageCreate: {
@@ -356,11 +355,6 @@ void MainWindow::handle_get_channels(const QJsonArray &arr)
 
 		add_channel(id, name);
 		m_channels.emplace(id, name);
-
-		// TODO: This should belong to some first-time setup.
-		if (m_middle_content == nullptr) {
-			set_channel(id);
-		}
 	}
 
 	qDebug() << "Got channels: " << m_channels;

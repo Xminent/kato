@@ -1,11 +1,18 @@
 #include <QPainterPath>
+#include <QVariantAnimation>
+#include <QtMath>
+#include <array>
 #include <kato/components/widget.hpp>
-#include <qabstractanimation.h>
-#include <qdebug.h>
-#include <qeasingcurve.h>
-#include <qpropertyanimation.h>
-#include <qvariantanimation.h>
 #include <utility>
+
+namespace
+{
+struct Point {
+	double angle;
+	double a;
+	double b;
+};
+} // namespace
 
 namespace kato
 {
@@ -244,6 +251,31 @@ void Widget::set_font(QFont font)
 	update();
 }
 
+void Widget::set_rotation(qreal degrees, bool animate)
+{
+	if (!animate) {
+		m_rotation = degrees;
+		return update();
+	}
+
+	auto *animation = new QVariantAnimation(this);
+
+	connect(animation, &QVariantAnimation::valueChanged,
+		[this, og_rotation = m_rotation,
+		 rotation_delta = degrees - m_rotation](const QVariant &value) {
+			const double progress =
+				static_cast<double>(value.toInt()) / 100.0;
+
+			m_rotation = og_rotation + rotation_delta * progress;
+			update();
+		});
+
+	animation->setDuration(250);
+	animation->setStartValue(0);
+	animation->setEndValue(100);
+	animation->setEasingCurve(QEasingCurve::InOutCubic);
+	animation->start(QAbstractAnimation::DeleteWhenStopped);
+}
 void Widget::resizeEvent([[maybe_unused]] QResizeEvent *e)
 {
 	update();
@@ -411,6 +443,30 @@ void Widget::paintEvent([[maybe_unused]] QPaintEvent *event)
 	painter.setBrush(QBrush{ m_border_color, Qt::SolidPattern });
 	painter.drawPath(bordered_path);
 	painter.setBrush(QBrush{ m_background_color, Qt::SolidPattern });
+
+	// Create a QTransform for rotation
+	QTransform rotation;
+	rotation.rotate(m_rotation);
+
+	// Rotate the corner points of the initial bounding box
+	std::array<QPointF, 4> corner_points{ QPointF(0, 0), QPointF(width, 0),
+					      QPointF(width, height),
+					      QPointF(0, height) };
+
+	for (size_t i{}; i < 4; ++i) {
+		corner_points.at(i) = rotation.map(corner_points.at(i));
+	}
+
+	// Calculate the center of the rotated bounding box
+	double centerX = (corner_points[0].x() + corner_points[2].x()) / 2.0;
+	double centerY = (corner_points[0].y() + corner_points[2].y()) / 2.0;
+
+	// Calculate the required translation to center the rotated bounding box
+	const auto dx = width / 2.0 - centerX;
+	const auto dy = height / 2.0 - centerY;
+
+	painter.setTransform(
+		QTransform::fromTranslate(dx, dy).rotate(m_rotation));
 
 	if (m_mov != nullptr) {
 		m_pixmap = m_mov->currentPixmap().scaled(

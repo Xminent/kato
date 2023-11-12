@@ -25,8 +25,8 @@ struct DropdownGroup : Widget {
 	void mousePressEvent(QMouseEvent *event) override;
 
 	QHBoxLayout *m_layout{ new QHBoxLayout(this) };
-	QLabel *m_arrow{ new QLabel(this) };
-	Widget *m_text{};
+	Widget *m_arrow{ new Widget(this) };
+	ClickableLabel *m_text{};
 	ClickableLabel *m_icon{};
 };
 } // namespace kato

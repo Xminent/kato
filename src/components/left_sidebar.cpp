@@ -12,11 +12,20 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 	setup_ui();
 
 	connect(m_text_channels, &DropdownGroup::toggle, this, [this] {
-		// if (m_text_channels->is_open()) {
-		// 	m_text_channels->close();
-		// } else {
-		// 	m_text_channels->open();
-		// }
+		// Hide all other channels, but the currently focused one.
+
+		for (int i{}; i < m_channel_layout->count(); i++) {
+			auto *item = qobject_cast<ChannelItem *>(
+				m_channel_layout->itemAt(i)->widget());
+
+			if (item == nullptr ||
+			    m_channel_idx && i == m_channel_idx) {
+				continue;
+			}
+
+			// toggle the show/hide state.
+			item->setVisible(!item->isVisible());
+		}
 	});
 
 	connect(m_text_channels, &DropdownGroup::add, this, [this] {
@@ -27,6 +36,7 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 
 void LeftSidebar::set_channels(const std::map<uint64_t, QString> &channels)
 {
+	// NOTE: Not as efficient as it could be.
 	while (m_channel_layout->count() > 0) {
 		auto *item = m_channel_layout->itemAt(0)->widget();
 
@@ -74,7 +84,12 @@ void LeftSidebar::add_channel(ChannelItem *channel)
 				if (auto *item = qobject_cast<ChannelItem *>(
 					    m_channel_layout->itemAt(i)
 						    ->widget());
-				    item != nullptr && item != c) {
+				    item != nullptr) {
+					if (item == c) {
+						m_channel_idx = i;
+						continue;
+					}
+
 					item->set_clicked(false);
 				}
 			}
