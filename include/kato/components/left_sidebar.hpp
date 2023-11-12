@@ -11,7 +11,7 @@ namespace kato
 {
 struct MiddleContent;
 
-struct LeftSidebar : QScrollArea {
+struct LeftSidebar : Widget {
 	Q_OBJECT
 
     public:
@@ -28,12 +28,14 @@ struct LeftSidebar : QScrollArea {
 	void add_channel(ChannelItem *channel);
 	void wheelEvent(QWheelEvent *e) override;
 
-	/// ScrollArea needs a content widget.
-	QWidget *m_content{ new QWidget() };
-	/// Used to store the items vertically.
-	QVBoxLayout *m_layout{ new QVBoxLayout(m_content) };
 	QString m_name;
+	QVBoxLayout *m_layout{ new QVBoxLayout(this) };
 	Header *m_header{};
+	QScrollArea *m_scroll_area{ new QScrollArea(this) };
+	/// ScrollArea needs a content widget.
+	QWidget *m_content{ new QWidget(this) };
+	/// Used to store the items vertically.
+	QVBoxLayout *m_item_layout{ new QVBoxLayout(m_content) };
 
 	/// The currently focused channel.
 	std::optional<int> m_channel_idx;

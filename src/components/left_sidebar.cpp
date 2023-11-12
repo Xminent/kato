@@ -5,7 +5,7 @@
 namespace kato
 {
 LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
-	: QScrollArea{ parent }
+	: Widget{ parent }
 	, m_name{ name }
 	, m_header{ new Header{ m_name, std::nullopt, this } }
 {
@@ -36,6 +36,8 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 
 void LeftSidebar::set_channels(const std::map<uint64_t, QString> &channels)
 {
+	m_text_channels->set_disabled(true);
+
 	// NOTE: Not as efficient as it could be.
 	while (m_channel_layout->count() > 0) {
 		auto *item = m_channel_layout->itemAt(0)->widget();
@@ -52,28 +54,34 @@ void LeftSidebar::set_channels(const std::map<uint64_t, QString> &channels)
 	for (const auto &[id, name] : channels) {
 		add_channel(new ChannelItem{ id, name, this });
 	}
+
+	m_text_channels->set_disabled(false);
 }
 
 void LeftSidebar::setup_ui()
 {
-	setFrameShape(Shape::NoFrame);
 	setFixedWidth(240);
-	setWidget(m_content);
-	setWidgetResizable(true);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBar(m_scroll_bar);
+
+	m_item_layout->setContentsMargins(0, 0, 0, 0);
+	m_item_layout->setSpacing(0);
+	m_item_layout->addWidget(m_text_channels);
+	m_item_layout->addLayout(m_channel_layout);
+	m_item_layout->addSpacerItem(new QSpacerItem(
+		0, 16, QSizePolicy::Minimum, QSizePolicy::Fixed));
+	m_item_layout->addWidget(m_voice_channels);
+	m_item_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum,
+						     QSizePolicy::Expanding));
+
+	m_scroll_area->setFrameShape(QScrollArea::Shape::NoFrame);
+	m_scroll_area->setWidget(m_content);
+	m_scroll_area->setWidgetResizable(true);
+	m_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_scroll_area->setVerticalScrollBar(m_scroll_bar);
 
 	m_layout->setContentsMargins(0, 0, 0, 0);
 	m_layout->setSpacing(0);
 	m_layout->addWidget(m_header);
-	m_layout->addWidget(m_text_channels);
-	m_layout->addLayout(m_channel_layout);
-	m_layout->addSpacerItem(new QSpacerItem(0, 16, QSizePolicy::Minimum,
-						QSizePolicy::Fixed));
-	m_layout->addWidget(m_voice_channels);
-	m_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum,
-						QSizePolicy::Expanding));
+	m_layout->addWidget(m_scroll_area);
 }
 
 void LeftSidebar::add_channel(ChannelItem *channel)
