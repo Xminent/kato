@@ -1,7 +1,7 @@
-#include <mozart/components/form.hpp>
+#include <kato/components/form.hpp>
 #include <qnamespace.h>
 
-namespace mozart
+namespace kato
 {
 Form::Form(const QString &name, QWidget *parent)
 	: Widget{ parent }
@@ -72,4 +72,4 @@ bool Form::eventFilter(QObject *obj, QEvent *event)
 
 	return QWidget::eventFilter(obj, event);
 }
-} // namespace mozart
+} // namespace kato

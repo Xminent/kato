@@ -1,6 +1,6 @@
-#include <mozart/api/audio_output.hpp>
+#include <kato/api/audio_output.hpp>
 
-namespace mozart
+namespace kato
 {
 AudioOutputDevice::AudioOutputDevice(QObject *parent)
 	: QIODevice{ parent }
@@ -22,4 +22,4 @@ qint64 AudioOutputDevice::readData(char *data, qint64 maxlen)
 
 	return 0; // Return 0 for now as a placeholder
 }
-} // namespace mozart
+} // namespace kato

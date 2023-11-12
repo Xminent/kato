@@ -3,9 +3,9 @@
 #include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
-#include <mozart/components/modal.hpp>
+#include <kato/components/modal.hpp>
 
-namespace mozart
+namespace kato
 {
 Modal::Modal(const QString &title, QWidget *child, QWidget *parent)
 	: Widget{ parent }
@@ -126,4 +126,4 @@ void Modal::resizeEvent(QResizeEvent *event)
 {
 	move_to_center();
 }
-} // namespace mozart
+} // namespace kato

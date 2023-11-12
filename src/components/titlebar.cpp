@@ -1,8 +1,8 @@
 #include <QDesktopServices>
 #include <QGraphicsDropShadowEffect>
-#include <mozart/components/titlebar.hpp>
+#include <kato/components/titlebar.hpp>
 
-namespace mozart
+namespace kato
 {
 Titlebar::Titlebar(QWidget *parent)
 	: Widget{ parent }
@@ -57,7 +57,7 @@ void Titlebar::setup_ui()
 
 	m_profile_picture->setFixedSize(40, 40);
 	m_profile_picture->set_border_radius(20);
-	m_profile_picture->set_pixmap(QPixmap{ ":/images/mozart.png" });
+	m_profile_picture->set_pixmap(QPixmap{ ":/images/kato.png" });
 
 	auto *effect = new QGraphicsDropShadowEffect();
 	effect->setBlurRadius(20);
@@ -65,4 +65,4 @@ void Titlebar::setup_ui()
 	effect->setOffset(0, 0);
 	m_profile_picture->setGraphicsEffect(effect);
 }
-} // namespace mozart
+} // namespace kato

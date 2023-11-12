@@ -1,7 +1,7 @@
 #include <QTime>
-#include <mozart/components/now_playing_bar.hpp>
+#include <kato/components/now_playing_bar.hpp>
 
-namespace mozart
+namespace kato
 {
 NowPlayingBar::NowPlayingBar(QWidget *parent)
 	: QWidget{ parent }
@@ -69,4 +69,4 @@ void NowPlayingBar::setup_ui()
 	m_vertical_layout->addLayout(m_progress_bar_layout);
 	m_vertical_layout->addLayout(m_actions_layout);
 }
-} // namespace mozart
+} // namespace kato

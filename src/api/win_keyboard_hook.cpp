@@ -1,5 +1,5 @@
 #include <QDebug>
-#include <mozart/api/win_keyboard_hook.hpp>
+#include <kato/api/win_keyboard_hook.hpp>
 
 // namespace {
 // LRESULT CALLBACK keyboard_hook(int code, WPARAM wparam, LPARAM lparam)
@@ -8,14 +8,14 @@
 //         const auto* key = reinterpret_cast<KBDLLHOOKSTRUCT*>(lparam);
 
 //         if (key->vkCode == VK_MEDIA_PLAY_PAUSE) {
-//             emit mozart::WinKeyboardHook::instance().play_pause_pressed();
+//             emit kato::WinKeyboardHook::instance().play_pause_pressed();
 //         }
 //     }
 //     return CallNextHookEx(nullptr, code, wparam, lparam);
 // }
 // } // namespace
 
-namespace mozart
+namespace kato
 {
 WinKeyboardHook::WinKeyboardHook()
 {
@@ -42,4 +42,4 @@ bool WinKeyboardHook::nativeEventFilter(
 
 	return false;
 }
-} // namespace mozart
+} // namespace kato

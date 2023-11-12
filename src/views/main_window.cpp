@@ -5,8 +5,8 @@
 #include <QNetworkReply>
 #include <QProcessEnvironment>
 #include <QStackedWidget>
-#include <mozart/api/win_dark.hpp>
-#include <mozart/views/main_window.hpp>
+#include <kato/api/win_dark.hpp>
+#include <kato/views/main_window.hpp>
 
 namespace
 {
@@ -17,7 +17,7 @@ constexpr uint16_t AUDIO_PORT{ 9090 };
 
 #ifdef Q_OS_WIN
 // NOLINTNEXTLINE
-mozart::MainWindow *main_window_instance{};
+kato::MainWindow *main_window_instance{};
 #endif
 
 enum class GatewayOpcode : uint8_t {
@@ -27,7 +27,7 @@ enum class GatewayOpcode : uint8_t {
 };
 } // namespace
 
-namespace mozart
+namespace kato
 {
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow{ parent }
@@ -130,7 +130,7 @@ void MainWindow::setup_signals()
 
 	connect(m_left_sidebar, &LeftSidebar::channel_selected, this,
 		[this](const ChannelItem *channel) {
-			set_middle_content(m_middle_contents[channel->id()]);
+			set_channel(channel->id());
 		});
 
 	connect(m_left_sidebar, &LeftSidebar::create_channel, this, [this] {
@@ -174,7 +174,7 @@ void MainWindow::setup_ui()
 	resize(WINDOW_SIZE);
 	setMinimumSize(MIN_WINDOW_SIZE);
 	winDark::setDark_Titlebar(reinterpret_cast<HWND>(winId()));
-	setWindowTitle("Mozart");
+	setWindowTitle("Kato");
 
 	QPalette palette;
 	QBrush background_brush{ QColor(0, 0, 0, 255) };
@@ -197,7 +197,7 @@ void MainWindow::setup_ui()
 	m_central_layout->addWidget(m_navbar);
 	m_central_layout->addWidget(m_left_sidebar);
 	m_central_layout->addSpacerItem(new QSpacerItem(
-		0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+		0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum));
 
 	setCentralWidget(m_central_widget);
 }
@@ -322,7 +322,7 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 		const auto id = static_cast<uint64_t>(id_it->toDouble());
 		const auto name = name_it->toString();
 
-		add_middle_content(id, name);
+		add_channel(id, name);
 		m_channels.emplace(id, name);
 		m_left_sidebar->set_channels(m_channels);
 		break;
@@ -347,12 +347,12 @@ void MainWindow::handle_get_channels(const QJsonArray &channels)
 		const auto id = static_cast<uint64_t>(id_it->toDouble());
 		const auto name = name_it->toString();
 
-		add_middle_content(id, name);
+		add_channel(id, name);
 		m_channels.emplace(id, name);
 
 		// TODO: This should belong to some first-time setup.
 		if (m_middle_content == nullptr) {
-			set_middle_content(m_middle_contents.at(id));
+			set_channel(id);
 		}
 	}
 
@@ -362,9 +362,10 @@ void MainWindow::handle_get_channels(const QJsonArray &channels)
 	m_left_sidebar->set_channels(m_channels);
 }
 
-void MainWindow::add_middle_content(uint64_t id, const QString &name)
+void MainWindow::add_channel(uint64_t id, const QString &name)
 {
-	if (m_middle_contents.find(id) != m_middle_contents.end()) {
+	if (m_middle_contents.find(id) != m_middle_contents.end() ||
+	    m_right_sidebars.find(id) != m_right_sidebars.end()) {
 		return;
 	}
 
@@ -373,10 +374,16 @@ void MainWindow::add_middle_content(uint64_t id, const QString &name)
 
 	connect(middle_content, &MiddleContent::message_sent, this,
 		[this](const QString &message) { create_message(message); });
+
+	auto *right_sidebar = new RightSidebar{ this };
+
+	m_right_sidebars.emplace(id, right_sidebar);
 }
 
-void MainWindow::set_middle_content(MiddleContent *content)
+void MainWindow::set_channel(uint64_t id)
 {
+	auto *content = m_middle_contents.at(id);
+
 	if (content == m_middle_content) {
 		return;
 	}
@@ -391,6 +398,24 @@ void MainWindow::set_middle_content(MiddleContent *content)
 	if (m_middle_content != nullptr) {
 		m_central_layout->insertWidget(2, m_middle_content);
 		m_middle_content->show();
+	}
+
+	auto *sidebar = m_right_sidebars.at(id);
+
+	if (sidebar == m_right_sidebar) {
+		return;
+	}
+
+	if (m_right_sidebar != nullptr) {
+		m_central_layout->removeWidget(m_right_sidebar);
+		m_right_sidebar->hide();
+	}
+
+	m_right_sidebar = sidebar;
+
+	if (m_right_sidebar != nullptr) {
+		m_central_layout->insertWidget(3, m_right_sidebar);
+		m_right_sidebar->show();
 	}
 }
 
@@ -418,4 +443,4 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 		m_modal->move_to_center();
 	}
 }
-} // namespace mozart
+} // namespace kato

@@ -1,7 +1,7 @@
 #include <QToolButton>
-#include <mozart/components/search_bar.hpp>
+#include <kato/components/search_bar.hpp>
 
-namespace mozart
+namespace kato
 {
 SearchBar::SearchBar(QWidget *parent)
 	: Widget{ parent }
@@ -89,4 +89,4 @@ void SearchBar::setup_ui()
 	m_label->setPixmap(QPixmap(":/icons/search.svg"));
 	m_label->setScaledContents(true);
 }
-} // namespace mozart
+} // namespace kato

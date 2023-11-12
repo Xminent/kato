@@ -1,6 +1,6 @@
-#include <mozart/components/clickable_label.hpp>
+#include <kato/components/clickable_label.hpp>
 
-namespace mozart
+namespace kato
 {
 ClickableLabel::ClickableLabel(const QString &text, QWidget *parent)
 	: QLabel(text, parent)
@@ -28,4 +28,4 @@ void ClickableLabel::mousePressEvent(QMouseEvent *event)
 	emit clicked();
 	QLabel::mousePressEvent(event);
 }
-} // namespace mozart
+} // namespace kato

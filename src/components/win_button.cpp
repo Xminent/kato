@@ -1,7 +1,7 @@
 #include <QMouseEvent>
-#include <mozart/components/win_button.hpp>
+#include <kato/components/win_button.hpp>
 
-namespace mozart
+namespace kato
 {
 WinButton::WinButton(const QPixmap &pixmap, QWidget *parent)
 	: Widget{ parent }
@@ -33,4 +33,4 @@ void WinButton::setup_ui()
 	set_background_color(Qt::black);
 	set_pixmap(m_pixmap);
 }
-} // namespace mozart
+} // namespace kato

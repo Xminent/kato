@@ -1,10 +1,10 @@
-#include "mozart/api/image_cache.hpp"
+#include "kato/api/image_cache.hpp"
 #include <QDebug>
 #include <QDesktopServices>
-#include <mozart/api/file_downloader.hpp>
-#include <mozart/components/message_item.hpp>
+#include <kato/api/file_downloader.hpp>
+#include <kato/components/message_item.hpp>
 
-namespace mozart
+namespace kato
 {
 MessageItem::MessageItem(const QString &avatar, const QString &author,
 			 const QString &message, QWidget *parent)
@@ -141,4 +141,4 @@ void MessageItem::mousePressEvent(QMouseEvent *event)
 {
 	QWidget::mousePressEvent(event);
 }
-} // namespace mozart
+} // namespace kato

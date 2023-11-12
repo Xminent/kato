@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mozart LANGUAGES CXX)
+project(kato LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "$<0:>${CMAKE_BINARY_DIR}/bin") # .exe and
 # .dll

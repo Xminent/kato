@@ -1,11 +1,11 @@
-#include "mozart/components/message_item.hpp"
-#include "mozart/components/widget.hpp"
+#include "kato/components/message_item.hpp"
+#include "kato/components/widget.hpp"
 #include <QDebug>
 #include <QUrl>
-#include <mozart/components/middle_content.hpp>
+#include <kato/components/middle_content.hpp>
 #include <qnamespace.h>
 
-namespace mozart
+namespace kato
 {
 MiddleContent::MiddleContent(uint64_t id, const QString &name, QWidget *parent)
 	: Widget{ parent }
@@ -57,4 +57,4 @@ void MiddleContent::setup_ui()
 	m_scroll_area_layout->addSpacerItem(m_spacer);
 	m_scroll_area_widget_contents->set_background_color(Qt::transparent);
 }
-} // namespace mozart
+} // namespace kato

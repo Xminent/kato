@@ -1,4 +1,4 @@
-#include <mozart/components/channel_item.hpp>
+#include <kato/components/channel_item.hpp>
 #include <qnamespace.h>
 
 namespace
@@ -8,7 +8,7 @@ constexpr uint8_t CIRCULAR_RADIUS = GUILD_ICON_DIMENSION / 2;
 constexpr uint8_t ROUNDED_RECT_RADIUS = 7;
 } // namespace
 
-namespace mozart
+namespace kato
 {
 ChannelItem::ChannelItem(uint64_t id, const QString &name, QWidget *parent)
 	: Widget{ parent }
@@ -98,4 +98,4 @@ void ChannelItem::mouseReleaseEvent([[maybe_unused]] QMouseEvent *e)
 {
 	emit left_clicked(this);
 }
-} // namespace mozart
+} // namespace kato

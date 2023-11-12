@@ -1,6 +1,6 @@
-#include <mozart/components/scroll_bar.hpp>
+#include <kato/components/scroll_bar.hpp>
 
-namespace mozart
+namespace kato
 {
 ScrollBar::ScrollBar(Qt::Orientation orientation, QWidget *parent)
 	: QScrollBar{ orientation, parent }
@@ -63,4 +63,4 @@ ScrollBar::ScrollBar(Qt::Orientation orientation, QWidget *parent)
 		"    background: none;"
 		"}");
 }
-} // namespace mozart
+} // namespace kato

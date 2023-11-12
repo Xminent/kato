@@ -1,7 +1,7 @@
-#include <mozart/components/dropdown_group.hpp>
+#include <kato/components/dropdown_group.hpp>
 #include <qnamespace.h>
 
-namespace mozart
+namespace kato
 {
 DropdownGroup::DropdownGroup(const QString &text, QWidget *parent)
 	: Widget{ parent }
@@ -95,4 +95,4 @@ void DropdownGroup::mousePressEvent(QMouseEvent *event)
 		emit toggle();
 	}
 }
-} // namespace mozart
+} // namespace kato

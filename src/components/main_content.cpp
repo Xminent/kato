@@ -1,6 +1,6 @@
-#include <mozart/components/main_content.hpp>
+#include <kato/components/main_content.hpp>
 
-namespace mozart
+namespace kato
 {
 MainContent::MainContent(QWidget *parent)
 	: Widget{ parent }
@@ -40,4 +40,4 @@ void MainContent::setup_ui()
 	m_bottom_half->set_background_color(QColor(230, 175, 65));
 	m_bottom_half->set_border_radius(0, 0, 15, 15);
 }
-} // namespace mozart
+} // namespace kato

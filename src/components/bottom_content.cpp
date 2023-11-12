@@ -1,7 +1,7 @@
 // #include <QBitmap>
-// #include <mozart/bottom_content.hpp>
+// #include <kato/bottom_content.hpp>
 
-// namespace mozart
+// namespace kato
 // {
 // BottomContent::BottomContent(QWidget *parent)
 // 	: Widget{parent}
@@ -107,4 +107,4 @@
 //         }
 //     )");
 // }
-// } // namespace mozart
+// } // namespace kato

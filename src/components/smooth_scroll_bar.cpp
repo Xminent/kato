@@ -1,6 +1,6 @@
-#include <mozart/components/smooth_scroll_bar.hpp>
+#include <kato/components/smooth_scroll_bar.hpp>
 
-namespace mozart
+namespace kato
 {
 SmoothScrollBar::SmoothScrollBar(Qt::Orientation orientation, QWidget *parent)
 	: QScrollBar{ orientation, parent }
@@ -111,4 +111,4 @@ void SmoothScrollBar::mouseMoveEvent(QMouseEvent *e)
 	QScrollBar::mouseMoveEvent(e);
 	m_target_value = value();
 }
-} // namespace mozart
+} // namespace kato

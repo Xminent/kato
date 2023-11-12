@@ -1,9 +1,8 @@
+#include <QDebug>
 #include <QWheelEvent>
-#include <mozart/components/left_sidebar.hpp>
-#include <qdebug.h>
-#include <qnamespace.h>
+#include <kato/components/left_sidebar.hpp>
 
-namespace mozart
+namespace kato
 {
 LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 	: QScrollArea{ parent }
@@ -91,4 +90,4 @@ void LeftSidebar::wheelEvent(QWheelEvent *e)
 	// When an event is captured , Call the slot function of relative scrolling
 	m_scroll_bar->scroll(e->angleDelta().y());
 }
-} // namespace mozart
+} // namespace kato

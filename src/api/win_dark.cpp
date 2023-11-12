@@ -2,7 +2,7 @@
 #include <QPalette>
 #include <QSettings>
 #include <QStyleFactory>
-#include <mozart/api/win_dark.hpp>
+#include <kato/api/win_dark.hpp>
 
 namespace winDark
 {

@@ -1,6 +1,6 @@
-#include <mozart/api/audio_probe.hpp>
+#include <kato/api/audio_probe.hpp>
 
-namespace mozart
+namespace kato
 {
 AudioProbeDevice::AudioProbeDevice(QObject *parent)
 	: QIODevice{ parent }
@@ -25,4 +25,4 @@ qint64 AudioProbeDevice::writeData(const char *data, qint64 count)
 	emit audio_available(buffer);
 	return count;
 }
-} // namespace mozart
+} // namespace kato

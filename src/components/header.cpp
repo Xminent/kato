@@ -1,6 +1,6 @@
-#include <mozart/components/header.hpp>
+#include <kato/components/header.hpp>
 
-namespace mozart
+namespace kato
 {
 Header::Header(const QString &name, const std::optional<QPixmap> &icon,
 	       QWidget *parent)
@@ -66,4 +66,4 @@ void Header::leaveEvent(QEvent *e)
 {
 	set_background_color(Qt::transparent);
 }
-} // namespace mozart
+} // namespace kato

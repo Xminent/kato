@@ -1,7 +1,7 @@
 #include <QMouseEvent>
-#include <mozart/components/play_pause_button.hpp>
+#include <kato/components/play_pause_button.hpp>
 
-namespace mozart
+namespace kato
 {
 PlayPauseButton::PlayPauseButton(QWidget *parent)
 	: Widget{ parent }
@@ -64,4 +64,4 @@ void PlayPauseButton::leaveEvent([[maybe_unused]] QEvent *event)
 	setFixedSize(32, 32);
 	set_border_radius(16);
 }
-} // namespace mozart
+} // namespace kato

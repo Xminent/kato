@@ -1,8 +1,9 @@
 #include <QNetworkReply>
+#include <kato/api/file_downloader.hpp>
 #include <memory>
-#include <mozart/api/file_downloader.hpp>
 
-namespace mozart
+
+namespace kato
 {
 void FileDownloader::download(
 	const QUrl &url,
@@ -38,4 +39,4 @@ void FileDownloader::download(
 		reply->deleteLater();
 	});
 }
-} // namespace mozart
+} // namespace kato

@@ -1,5 +1,5 @@
 #include <QPainterPath>
-#include <mozart/components/widget.hpp>
+#include <kato/components/widget.hpp>
 #include <qabstractanimation.h>
 #include <qdebug.h>
 #include <qeasingcurve.h>
@@ -7,7 +7,7 @@
 #include <qvariantanimation.h>
 #include <utility>
 
-namespace mozart
+namespace kato
 {
 Widget::Widget(QWidget *parent)
 	: QWidget{ parent }
@@ -464,4 +464,4 @@ void Widget::paintEvent([[maybe_unused]] QPaintEvent *event)
 			m_text_alignment, m_text);
 	}
 }
-} // namespace mozart
+} // namespace kato

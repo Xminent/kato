@@ -1,7 +1,7 @@
 #include <QMouseEvent>
-#include <mozart/components/hover_button.hpp>
+#include <kato/components/hover_button.hpp>
 
-namespace mozart
+namespace kato
 {
 HoverButton::HoverButton(const QPixmap &pixmap, QWidget *parent)
 	: Widget{ parent }
@@ -46,4 +46,4 @@ void HoverButton::setup_ui()
 	setFixedSize(32, 32);
 	set_pixmap(m_pixmap);
 }
-} // namespace mozart
+} // namespace kato

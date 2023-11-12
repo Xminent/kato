@@ -1,5 +1,5 @@
 #include <QMouseEvent>
-#include <mozart/components/guild_icon.hpp>
+#include <kato/components/guild_icon.hpp>
 
 namespace
 {
@@ -8,7 +8,7 @@ constexpr uint8_t CIRCULAR_RADIUS = GUILD_ICON_DIMENSION / 2;
 constexpr uint8_t ROUNDED_RECT_RADIUS = GUILD_ICON_DIMENSION / 3;
 } // namespace
 
-namespace mozart
+namespace kato
 {
 GuildIcon::GuildIcon(const std::optional<QString> &name, QWidget *parent)
 	: Widget{ parent }
@@ -82,4 +82,4 @@ void GuildIcon::mouseReleaseEvent(QMouseEvent *e)
 
 	emit left_clicked(this);
 }
-} // namespace mozart
+} // namespace kato

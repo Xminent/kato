@@ -1,9 +1,9 @@
 #include <QDir>
 #include <QPixmap>
-#include <mozart/api/file_downloader.hpp>
-#include <mozart/api/image_cache.hpp>
+#include <kato/api/file_downloader.hpp>
+#include <kato/api/image_cache.hpp>
 
-namespace mozart
+namespace kato
 {
 bool ImageCache::contains(const QString &filename)
 {
@@ -96,4 +96,4 @@ ImageCache &ImageCache::instance()
 			    "/cache";
 	return instance;
 }
-} // namespace mozart
+} // namespace kato

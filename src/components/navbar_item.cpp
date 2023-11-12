@@ -1,7 +1,7 @@
 #include <QMouseEvent>
-#include <mozart/components/navbar_item.hpp>
+#include <kato/components/navbar_item.hpp>
 
-namespace mozart
+namespace kato
 {
 NavBarItem::NavBarItem(const std::optional<QString> &name, QWidget *parent)
 	: Widget{ parent }
@@ -72,4 +72,4 @@ void NavBarItem::leaveEvent(QEvent *e)
 	m_pill->set_background_color(Qt::transparent);
 	m_pill->set_border_radius(0, 4, 4, 0);
 }
-} // namespace mozart
+} // namespace kato

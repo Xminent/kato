@@ -1,7 +1,7 @@
 #include <QMouseEvent>
-#include <mozart/components/navbar.hpp>
+#include <kato/components/navbar.hpp>
 
-namespace mozart
+namespace kato
 {
 NavBar::NavBar(QWidget *parent)
 	: QScrollArea{ parent }
@@ -67,4 +67,4 @@ void NavBar::wheelEvent(QWheelEvent *e)
 {
 	m_scroll_bar->scroll(e->angleDelta().y());
 }
-} // namespace mozart
+} // namespace kato
