@@ -27,15 +27,22 @@ struct LeftSidebar : Widget {
 	void setup_ui();
 	void add_channel(ChannelItem *channel);
 	void wheelEvent(QWheelEvent *e) override;
+	void enterEvent(QEvent *e) override;
+	void leaveEvent(QEvent *e) override;
 
 	QString m_name;
 	QVBoxLayout *m_layout{ new QVBoxLayout(this) };
 	Header *m_header{};
 	QScrollArea *m_scroll_area{ new QScrollArea(this) };
 	/// ScrollArea needs a content widget.
-	QWidget *m_content{ new QWidget(this) };
+	Widget *m_content{ new Widget(this) };
+	/// The content widget needs a layout.
+	QHBoxLayout *m_content_layout{ new QHBoxLayout(m_content) };
 	/// Used to store the items vertically.
-	QVBoxLayout *m_item_layout{ new QVBoxLayout(m_content) };
+	QVBoxLayout *m_item_layout{ new QVBoxLayout() };
+	/// Spacer for the scroll bar.
+	QSpacerItem *m_spacer{ new QSpacerItem(8, 0, QSizePolicy::Fixed,
+					       QSizePolicy::Expanding) };
 
 	/// The currently focused channel.
 	std::optional<int> m_channel_idx;

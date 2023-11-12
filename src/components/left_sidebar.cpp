@@ -32,6 +32,23 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 		qDebug() << "show add channel modal";
 		emit create_channel();
 	});
+
+	connect(m_scroll_bar, &QScrollBar::rangeChanged, this, [this] {
+		bool is_overflowed = m_scroll_area->widget()->height() >
+				     m_scroll_area->height();
+
+		m_content_layout->removeItem(m_spacer);
+
+		if (is_overflowed) {
+			m_spacer->changeSize(4, 0, QSizePolicy::Fixed,
+					     QSizePolicy::Expanding);
+		} else {
+			m_spacer->changeSize(8, 0, QSizePolicy::Fixed,
+					     QSizePolicy::Expanding);
+		}
+
+		m_content_layout->addSpacerItem(m_spacer);
+	});
 }
 
 void LeftSidebar::set_channels(const std::map<uint64_t, QString> &channels)
@@ -72,11 +89,23 @@ void LeftSidebar::setup_ui()
 	m_item_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum,
 						     QSizePolicy::Expanding));
 
+	m_content_layout->setContentsMargins(0, 0, 0, 0);
+	m_content_layout->setSpacing(0);
+	m_content_layout->addLayout(m_item_layout);
+	m_content_layout->addSpacerItem(m_spacer);
+
 	m_scroll_area->setFrameShape(QScrollArea::Shape::NoFrame);
 	m_scroll_area->setWidget(m_content);
 	m_scroll_area->setWidgetResizable(true);
 	m_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	m_scroll_area->setVerticalScrollBar(m_scroll_bar);
+
+	m_scroll_bar->setSizePolicy([this] {
+		auto sp = m_scroll_bar->sizePolicy();
+		sp.setRetainSizeWhenHidden(true);
+		return sp;
+	}());
 
 	m_layout->setContentsMargins(0, 0, 0, 0);
 	m_layout->setSpacing(0);
@@ -111,6 +140,16 @@ void LeftSidebar::add_channel(ChannelItem *channel)
 void LeftSidebar::wheelEvent(QWheelEvent *e)
 {
 	// When an event is captured , Call the slot function of relative scrolling
-	m_scroll_bar->scroll(e->angleDelta().y());
+	// m_scroll_bar->scroll(e->angleDelta().y());
+}
+
+void LeftSidebar::enterEvent(QEvent *e)
+{
+	m_scroll_bar->setVisible(true);
+}
+
+void LeftSidebar::leaveEvent(QEvent *e)
+{
+	m_scroll_bar->setVisible(false);
 }
 } // namespace kato
