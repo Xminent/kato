@@ -1,9 +1,7 @@
-#include "kato/components/message_item.hpp"
-#include "kato/components/widget.hpp"
 #include <QDebug>
 #include <QUrl>
+#include <kato/components/message_item.hpp>
 #include <kato/components/middle_content.hpp>
-#include <qnamespace.h>
 
 namespace kato
 {

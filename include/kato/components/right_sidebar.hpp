@@ -6,6 +6,7 @@
 #include <kato/components/dropdown_group.hpp>
 #include <kato/components/header.hpp>
 #include <kato/components/smooth_scroll_bar.hpp>
+#include <kato/components/user.hpp>
 
 namespace kato
 {
@@ -17,7 +18,7 @@ struct RightSidebar : QScrollArea {
     public:
 	explicit RightSidebar(QWidget *parent = nullptr);
 
-	void add_user(const QString &avatar, const QString &name);
+	void add_user(User *user);
 
     private:
 	void setup_ui();

@@ -6,6 +6,7 @@
 #include <QProcessEnvironment>
 #include <QStackedWidget>
 #include <kato/api/win_dark.hpp>
+#include <kato/defer.hpp>
 #include <kato/views/main_window.hpp>
 
 namespace
@@ -196,8 +197,7 @@ void MainWindow::setup_ui()
 	m_central_layout->setSpacing(0);
 	m_central_layout->addWidget(m_navbar);
 	m_central_layout->addWidget(m_left_sidebar);
-	m_central_layout->addSpacerItem(new QSpacerItem(
-		0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum));
+	m_central_layout->addSpacerItem(m_spacer);
 
 	setCentralWidget(m_central_widget);
 }
@@ -240,8 +240,6 @@ void MainWindow::create_message(const QString &message)
 
 void MainWindow::handle_gateway_event(const QJsonObject &json)
 {
-	qDebug() << "received JSON: " << json;
-
 	const auto op_it = json.find("op");
 	const auto d_it = json.find("d");
 
@@ -251,16 +249,20 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 		return;
 	}
 
-	const auto op = op_it->toInt();
+	const auto op = static_cast<GatewayOpcode>(op_it->toInt());
 	const auto d = d_it->toObject();
 
-	switch (static_cast<GatewayOpcode>(op)) {
+	qDebug() << "received op: " << static_cast<int>(op) << " d: " << d;
+
+	switch (op) {
 	case GatewayOpcode::Ready: {
 		const auto user_it = d.find("user");
 		const auto channels_it = d.find("channels");
+		const auto users = d.find("users");
 
 		if (user_it == d.end() || !user_it->isObject() ||
-		    channels_it == d.end() || !channels_it->isArray()) {
+		    channels_it == d.end() || !channels_it->isArray() ||
+		    users == d.end() || !users->isArray()) {
 			qDebug() << "Invalid JSON: " << d;
 			return;
 		}
@@ -275,6 +277,7 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 		m_name = username_it->toString();
 		qDebug() << "Setting name to: " << m_name;
 		handle_get_channels(channels_it->toArray());
+		handle_get_users(users->toArray());
 		create_message("Hello world");
 		break;
 	}
@@ -332,10 +335,14 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 	}
 }
 
-void MainWindow::handle_get_channels(const QJsonArray &channels)
+void MainWindow::handle_get_channels(const QJsonArray &arr)
 {
-	for (const auto &channel : channels) {
-		const auto obj = channel.toObject();
+	for (const auto &value : arr) {
+		if (!value.isObject()) {
+			continue;
+		}
+
+		const auto obj = value.toObject();
 		const auto id_it = obj.find("id");
 		const auto name_it = obj.find("name");
 
@@ -362,6 +369,47 @@ void MainWindow::handle_get_channels(const QJsonArray &channels)
 	m_left_sidebar->set_channels(m_channels);
 }
 
+void MainWindow::handle_get_users(const QJsonArray &arr)
+{
+	for (const auto &value : arr) {
+		if (!value.isObject()) {
+			continue;
+		}
+
+		const auto obj = value.toObject();
+		const auto id_it = obj.find("id");
+		const auto avatar_it = obj.find("avatar");
+		const auto name_it = obj.find("username");
+
+		if (id_it == obj.end() || avatar_it == obj.end() ||
+		    !id_it->isDouble() || name_it == obj.end() ||
+		    !name_it->isString()) {
+			continue;
+		}
+
+		QString avatar;
+
+		if (avatar_it->isString()) {
+			avatar = avatar_it->toString();
+		}
+
+		const auto id = static_cast<uint64_t>(id_it->toDouble());
+		const auto name = name_it->toString();
+
+		m_users.try_emplace(id, new User{ avatar, name });
+	}
+
+	if (m_right_sidebar == nullptr) {
+		return;
+	}
+
+	for (const auto &[_, user] : m_users) {
+		m_right_sidebar->add_user(user);
+	}
+
+	qDebug() << "Got " << m_users.size() << " users";
+}
+
 void MainWindow::add_channel(uint64_t id, const QString &name)
 {
 	if (m_middle_contents.find(id) != m_middle_contents.end() ||
@@ -382,6 +430,13 @@ void MainWindow::add_channel(uint64_t id, const QString &name)
 
 void MainWindow::set_channel(uint64_t id)
 {
+	defer
+	{
+		if (m_middle_content == nullptr && m_right_sidebar == nullptr) {
+			m_central_layout->addSpacerItem(m_spacer);
+		}
+	};
+
 	auto *content = m_middle_contents.at(id);
 
 	if (content == m_middle_content) {
@@ -414,9 +469,15 @@ void MainWindow::set_channel(uint64_t id)
 	m_right_sidebar = sidebar;
 
 	if (m_right_sidebar != nullptr) {
+		for (const auto &[_, user] : m_users) {
+			m_right_sidebar->add_user(user);
+		}
+
 		m_central_layout->insertWidget(3, m_right_sidebar);
 		m_right_sidebar->show();
 	}
+
+	m_central_layout->removeItem(m_spacer);
 }
 
 void MainWindow::connect_to_gateway()

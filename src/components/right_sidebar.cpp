@@ -1,6 +1,6 @@
-#include "kato/components/user.hpp"
 #include <QWheelEvent>
 #include <kato/components/right_sidebar.hpp>
+#include <kato/components/user.hpp>
 
 namespace kato
 {
@@ -11,9 +11,8 @@ RightSidebar::RightSidebar(QWidget *parent)
 	setup_ui();
 }
 
-void RightSidebar::add_user(const QString &avatar, const QString &name)
+void RightSidebar::add_user(User *user)
 {
-	auto *user = new User{ avatar, name, this };
 	m_user_layout->addWidget(user);
 }
 
@@ -33,9 +32,5 @@ void RightSidebar::setup_ui()
 	m_layout->addLayout(m_user_layout);
 	m_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum,
 						QSizePolicy::Expanding));
-
-	for (int i{}; i < 10; ++i) {
-		add_user("", "kato");
-	}
 }
 } // namespace kato

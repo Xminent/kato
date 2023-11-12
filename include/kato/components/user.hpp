@@ -1,8 +1,8 @@
 #ifndef KATO_COMPONENTS_USER_HPP
 #define KATO_COMPONENTS_USER_HPP
 
+#include <QHBoxLayout>
 #include <kato/components/widget.hpp>
-#include <qboxlayout.h>
 
 namespace kato
 {

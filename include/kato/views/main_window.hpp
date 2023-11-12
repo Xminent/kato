@@ -1,6 +1,7 @@
 #ifndef KATO_VIEWS_MAIN_WINDOW_HPP
 #define KATO_VIEWS_MAIN_WINDOW_HPP
 
+#include "kato/components/user.hpp"
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioProbe>
@@ -12,6 +13,7 @@
 #include <QUdpSocket>
 #include <QtWebSockets/QWebSocket>
 #include <kato/api/audio_probe.hpp>
+#include <kato/api/user.hpp>
 #include <kato/components/left_sidebar.hpp>
 #include <kato/components/middle_content.hpp>
 #include <kato/components/modal.hpp>
@@ -19,7 +21,6 @@
 #include <kato/components/right_sidebar.hpp>
 #include <kato/components/titlebar.hpp>
 #include <memory>
-
 
 namespace kato
 {
@@ -40,7 +41,8 @@ struct MainWindow : QMainWindow {
 	void setup_ui();
 	void create_message(const QString &message);
 	void handle_gateway_event(const QJsonObject &json);
-	void handle_get_channels(const QJsonArray &channels);
+	void handle_get_channels(const QJsonArray &arr);
+	void handle_get_users(const QJsonArray &arr);
 	void add_channel(uint64_t id, const QString &name);
 	void set_channel(uint64_t id);
 	void connect_to_gateway();
@@ -65,7 +67,13 @@ struct MainWindow : QMainWindow {
 	std::map<uint64_t, RightSidebar *> m_right_sidebars;
 	RightSidebar *m_right_sidebar{};
 
+	QSpacerItem *m_spacer{ new QSpacerItem(
+		0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum) };
+
 	std::map<uint64_t, QString> m_channels;
+
+	// Users for each guild. (Currently only have one guild).
+	std::map<uint64_t, User *> m_users;
 
 	// AudioRecording/Playback setup.
 	// QAudioProbe *m_audio_probe{ new QAudioProbe(this) };

@@ -24,6 +24,7 @@ User::User(const QString &avatar, const QString &name, QWidget *parent)
 
 void User::setup_ui()
 {
+	setCursor(Qt::PointingHandCursor);
 	setFixedSize(224, 44);
 	set_background_color(Qt::transparent);
 
@@ -31,20 +32,28 @@ void User::setup_ui()
 	m_avatar->set_border_radius(ICON_RADIUS);
 	m_avatar->set_pixmap(QPixmap{ ":/images/logo.png" });
 
-	m_name->setMaximumSize(124, 20);
+	m_name->set_fixed_size(164, 34);
 	m_name->set_background_color(Qt::transparent);
-	m_name->set_text_alignment(Qt::AlignLeft);
+	m_name->set_text_alignment(Qt::AlignLeft | Qt::AlignVCenter);
 	m_name->set_text_color(QColor(142, 146, 151));
 
 	m_layout->setContentsMargins(0, 0, 0, 0);
 	m_layout->setSpacing(0);
+	m_layout->addSpacerItem(new QSpacerItem(8, 0, QSizePolicy::Fixed,
+						QSizePolicy::Minimum));
 	m_layout->addWidget(m_avatar);
+	m_layout->addSpacerItem(new QSpacerItem(8, 0, QSizePolicy::Fixed,
+						QSizePolicy::Minimum));
 	m_layout->addWidget(m_name);
+	m_layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding,
+						QSizePolicy::Minimum));
+	m_layout->addSpacerItem(new QSpacerItem(8, 0, QSizePolicy::Fixed,
+						QSizePolicy::Minimum));
 }
 
 void User::enterEvent(QEvent *event)
 {
-	set_background_color(QColor(47, 49, 54));
+	// set_background_color(QColor(47, 49, 54));
 	set_border_radius(ROUNDED_RECT_RADIUS);
 
 	m_name->set_text_color(Qt::white);
@@ -52,7 +61,7 @@ void User::enterEvent(QEvent *event)
 
 void User::leaveEvent(QEvent *event)
 {
-	set_background_color(Qt::transparent);
+	// set_background_color(Qt::transparent);
 	set_border_radius(0);
 
 	m_name->set_text_color(QColor(142, 146, 151));
