@@ -282,11 +282,21 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 	}
 	case GatewayOpcode::MessageCreate: {
 		const auto author_it = d.find("author");
+		const auto channel_id_it = d.find("channel_id");
 		const auto content_it = d.find("content");
 
 		if (author_it == d.end() || !author_it->isObject() ||
+		    channel_id_it == d.end() || !channel_id_it->isDouble() ||
 		    content_it == d.end() || !content_it->isString()) {
 			qDebug() << "Invalid JSON: " << d;
+			return;
+		}
+
+		const auto channel_id =
+			static_cast<uint64_t>(channel_id_it->toDouble());
+
+		if (m_middle_contents.find(channel_id) ==
+		    m_middle_contents.end()) {
 			return;
 		}
 
@@ -306,9 +316,9 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 			avatar = avatar_it->toString();
 		}
 
-		m_middle_content->add_message(avatar,
-					      author_name_it->toString(),
-					      content_it->toString());
+		m_middle_contents.at(channel_id)
+			->add_message(avatar, author_name_it->toString(),
+				      content_it->toString());
 		break;
 	}
 	case GatewayOpcode::ChannelCreate: {
