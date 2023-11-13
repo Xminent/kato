@@ -5,23 +5,38 @@
 
 namespace kato
 {
-MiddleContent::MiddleContent(uint64_t id, const QString &name, QWidget *parent)
+MiddleContent::MiddleContent(uint64_t channel_id, const QString &channel_name,
+			     QWidget *parent)
 	: Widget{ parent }
-	, m_id{ id }
-	, m_name{ name }
-	, m_header{ new Header(name, QPixmap{ ":/icons/text.svg" }, this) }
+	, m_channel_id{ channel_id }
+	, m_channel_name{ channel_name }
+	, m_header{ new Header(channel_name, QPixmap{ ":/icons/text.svg" },
+			       this) }
 {
 	setup_ui();
 
 	connect(m_form, &Form::message_sent, this,
-		&MiddleContent::message_sent);
+		[this](const QString &message) {
+			emit message_sent(message, [this] {
+				m_scroll_to_bottom = true;
+				m_form->clear();
+			});
+		});
+
+	connect(m_scroll_bar, &ScrollBar::rangeChanged, this,
+		[this]([[maybe_unused]] int min, int max) {
+			if (m_scroll_to_bottom) {
+				m_scroll_bar->setValue(max);
+				m_scroll_to_bottom = false;
+			}
+		});
 }
 
-void MiddleContent::add_message(const QString &avatar, const QString &author,
-				const QString &message)
+void MiddleContent::add_message(uint64_t id, const QString &avatar,
+				const QString &author, const QString &message)
 {
 	m_messages_layout->addWidget(
-		new MessageItem{ avatar, author, message, this });
+		new MessageItem{ id, avatar, author, message, this });
 }
 
 void MiddleContent::setup_ui()
@@ -50,6 +65,7 @@ void MiddleContent::setup_ui()
 	m_scroll_area->setFrameShape(QFrame::NoFrame);
 	m_scroll_area->setVerticalScrollBar(m_scroll_bar);
 	m_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
 	m_scroll_area_layout->addLayout(m_messages_layout);
 	m_scroll_area_layout->addSpacerItem(m_spacer);

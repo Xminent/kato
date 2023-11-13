@@ -13,6 +13,8 @@ struct Form : Widget {
     public:
 	explicit Form(const QString &name, QWidget *parent = nullptr);
 
+	void clear();
+
     signals:
 	void message_sent(const QString &message);
 

@@ -26,7 +26,7 @@ void ChannelItem::setup_ui()
 		f.setBold(true);
 		return f;
 	}());
-	setFixedSize(224, 34);
+	setFixedHeight(34);
 	set_background_color(Qt::transparent);
 	set_text_color(QColor(142, 146, 151));
 

@@ -1,14 +1,16 @@
-#include "kato/api/image_cache.hpp"
 #include <QDebug>
 #include <QDesktopServices>
 #include <kato/api/file_downloader.hpp>
+#include <kato/api/image_cache.hpp>
 #include <kato/components/message_item.hpp>
 
 namespace kato
 {
-MessageItem::MessageItem(const QString &avatar, const QString &author,
-			 const QString &message, QWidget *parent)
+MessageItem::MessageItem(uint64_t id, const QString &avatar,
+			 const QString &author, const QString &message,
+			 QWidget *parent)
 	: Widget{ parent }
+	, m_id{ id }
 	, m_author{ author }
 	, m_date{ QDateTime::currentDateTime() }
 	, m_message{ message }

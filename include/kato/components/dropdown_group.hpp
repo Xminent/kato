@@ -14,6 +14,11 @@ struct DropdownGroup : Widget {
     public:
 	explicit DropdownGroup(const QString &text, QWidget *parent = nullptr);
 
+	void set_disabled(bool disabled)
+	{
+		m_disabled = disabled;
+	}
+
     signals:
 	void toggle();
 	void add();
@@ -24,9 +29,12 @@ struct DropdownGroup : Widget {
 	void leaveEvent(QEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 
+	/// Disabled on start, there are no channels.
+	bool m_disabled{ true };
+	bool m_collapsed{};
 	QHBoxLayout *m_layout{ new QHBoxLayout(this) };
 	Widget *m_arrow{ new Widget(this) };
-	ClickableLabel *m_text{};
+	QLabel *m_text{};
 	ClickableLabel *m_icon{};
 };
 } // namespace kato

@@ -1,7 +1,6 @@
 #ifndef KATO_VIEWS_MAIN_WINDOW_HPP
 #define KATO_VIEWS_MAIN_WINDOW_HPP
 
-#include "kato/components/user.hpp"
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioProbe>
@@ -20,6 +19,7 @@
 #include <kato/components/navbar.hpp>
 #include <kato/components/right_sidebar.hpp>
 #include <kato/components/titlebar.hpp>
+#include <kato/components/user.hpp>
 #include <memory>
 
 namespace kato
@@ -39,12 +39,13 @@ struct MainWindow : QMainWindow {
 	void setup_audio();
 	void setup_signals();
 	void setup_ui();
-	void create_message(const QString &message);
+	void create_message(uint64_t id, const QString &message,
+			    const std::function<void()> &on_sent);
 	void handle_gateway_event(const QJsonObject &json);
 	void handle_get_channels(const QJsonArray &arr);
 	void handle_get_users(const QJsonArray &arr);
 	void add_channel(uint64_t id, const QString &name);
-	void set_channel(uint64_t id);
+	void set_channel(std::optional<uint64_t> id);
 	void connect_to_gateway();
 	void identify();
 	void resizeEvent(QResizeEvent *event) override;
@@ -90,6 +91,10 @@ struct MainWindow : QMainWindow {
 
 	// Websocket setup.
 	QWebSocket m_ws;
+	// ID acquired from authenticating.
+	uint64_t m_id{};
+	// Avatar acquired from authenticating.
+	QString m_avatar;
 	// Name acquired from authenticating.
 	QString m_name;
 	// Token provided at runtime/startup.

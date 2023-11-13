@@ -202,7 +202,8 @@ void MainWindow::setup_ui()
 	setCentralWidget(m_central_widget);
 }
 
-void MainWindow::create_message(const QString &message)
+void MainWindow::create_message(uint64_t id, const QString &message,
+				const std::function<void()> &on_sent)
 {
 	if (m_middle_content == nullptr) {
 		return;
@@ -215,7 +216,7 @@ void MainWindow::create_message(const QString &message)
 
 	auto url = QString{ "http://localhost:%1/api/channels/%2/messages" }
 			   .arg(API_PORT)
-			   .arg(m_middle_content->id());
+			   .arg(m_middle_content->channel_id());
 
 	qDebug() << "Sending: " << doc.toJson(QJsonDocument::Compact) << " to "
 		 << url;
@@ -229,12 +230,18 @@ void MainWindow::create_message(const QString &message)
 	auto *reply = m_network_manager->post(
 		req, doc.toJson(QJsonDocument::Compact));
 
-	connect(reply, &QNetworkReply::finished, reply, [reply] {
+	connect(reply, &QNetworkReply::finished, reply, [this, reply, on_sent] {
+		defer
+		{
+			reply->deleteLater();
+		};
+
 		if (reply->error() != QNetworkReply::NoError) {
 			qDebug() << "Error: " << reply->errorString();
+			return;
 		}
 
-		reply->deleteLater();
+		on_sent();
 	});
 }
 
@@ -268,12 +275,18 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 		}
 
 		const auto user = user_it->toObject();
+		const auto id_it = user.find("id");
+		const auto avatar_it = user.find("avatar");
 		const auto username_it = user.find("username");
 
-		if (username_it == user.end() || !username_it->isString()) {
+		if (id_it == user.end() || !id_it->isDouble() ||
+		    avatar_it == user.end() || !avatar_it->isString() ||
+		    username_it == user.end() || !username_it->isString()) {
 			qDebug() << "Invalid JSON: " << d;
 		}
 
+		m_id = static_cast<uint64_t>(id_it->toDouble());
+		m_avatar = avatar_it->toString();
 		m_name = username_it->toString();
 		qDebug() << "Setting name to: " << m_name;
 		handle_get_channels(channels_it->toArray());
@@ -284,10 +297,12 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 		const auto author_it = d.find("author");
 		const auto channel_id_it = d.find("channel_id");
 		const auto content_it = d.find("content");
+		const auto id_it = d.find("id");
 
 		if (author_it == d.end() || !author_it->isObject() ||
 		    channel_id_it == d.end() || !channel_id_it->isDouble() ||
-		    content_it == d.end() || !content_it->isString()) {
+		    content_it == d.end() || !content_it->isString() ||
+		    id_it == d.end() || !id_it->isDouble()) {
 			qDebug() << "Invalid JSON: " << d;
 			return;
 		}
@@ -316,8 +331,13 @@ void MainWindow::handle_gateway_event(const QJsonObject &json)
 			avatar = avatar_it->toString();
 		}
 
+		const auto id = static_cast<uint64_t>(id_it->toDouble());
+
+		qDebug() << "adding message: " << id
+			 << "to channel: " << channel_id;
+
 		m_middle_contents.at(channel_id)
-			->add_message(avatar, author_name_it->toString(),
+			->add_message(id, avatar, author_name_it->toString(),
 				      content_it->toString());
 		break;
 	}
@@ -425,14 +445,16 @@ void MainWindow::add_channel(uint64_t id, const QString &name)
 	m_middle_contents.emplace(id, middle_content);
 
 	connect(middle_content, &MiddleContent::message_sent, this,
-		[this](const QString &message) { create_message(message); });
+		[this, id](const QString &message, const auto &on_sent) {
+			create_message(id, message, on_sent);
+		});
 
 	auto *right_sidebar = new RightSidebar{ this };
 
 	m_right_sidebars.emplace(id, right_sidebar);
 }
 
-void MainWindow::set_channel(uint64_t id)
+void MainWindow::set_channel(std::optional<uint64_t> id)
 {
 	defer
 	{
@@ -441,7 +463,7 @@ void MainWindow::set_channel(uint64_t id)
 		}
 	};
 
-	auto *content = m_middle_contents.at(id);
+	auto *content = id ? m_middle_contents.at(*id) : nullptr;
 
 	if (content == m_middle_content) {
 		return;
@@ -459,7 +481,7 @@ void MainWindow::set_channel(uint64_t id)
 		m_middle_content->show();
 	}
 
-	auto *sidebar = m_right_sidebars.at(id);
+	auto *sidebar = id ? m_right_sidebars.at(*id) : nullptr;
 
 	if (sidebar == m_right_sidebar) {
 		return;

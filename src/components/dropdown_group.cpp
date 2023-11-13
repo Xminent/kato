@@ -5,17 +5,10 @@ namespace kato
 {
 DropdownGroup::DropdownGroup(const QString &text, QWidget *parent)
 	: Widget{ parent }
-	, m_text{ new ClickableLabel(text, this) }
+	, m_text{ new QLabel(text, this) }
 	, m_icon{ new ClickableLabel{ {}, this } }
 {
 	setup_ui();
-
-	connect(m_text, &ClickableLabel::clicked, this,
-		[this, collapsed = false]() mutable {
-			collapsed = !collapsed;
-
-			m_arrow->set_rotation(collapsed ? 0 : -90, true);
-		});
 
 	connect(m_icon, &ClickableLabel::clicked, this, &DropdownGroup::add);
 
@@ -109,6 +102,13 @@ void DropdownGroup::leaveEvent(QEvent *event)
 void DropdownGroup::mousePressEvent(QMouseEvent *event)
 {
 	if (event->button() == Qt::LeftButton) {
+		if (m_disabled) {
+			return;
+		}
+
+		m_collapsed = !m_collapsed;
+
+		m_arrow->set_rotation(m_collapsed ? -90 : 0, true);
 		emit toggle();
 	}
 }

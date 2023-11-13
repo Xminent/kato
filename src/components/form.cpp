@@ -15,6 +15,11 @@ Form::Form(const QString &name, QWidget *parent)
 	m_input->installEventFilter(this);
 }
 
+void Form::clear()
+{
+	m_input->clear();
+}
+
 void Form::setup_ui()
 {
 	setMinimumHeight(68);
@@ -57,13 +62,12 @@ void Form::setup_ui()
 bool Form::eventFilter(QObject *obj, QEvent *event)
 {
 	if (obj == m_input && event->type() == QEvent::KeyPress) {
-		auto *key_event = dynamic_cast<QKeyEvent *>(event);
+		const auto *key_event = dynamic_cast<QKeyEvent *>(event);
 
 		if (key_event->key() == Qt::Key_Return ||
 		    key_event->key() == Qt::Key_Enter) {
 			if (!m_message.isEmpty()) {
 				emit message_sent(m_message);
-				m_input->clear();
 			}
 
 			return true;

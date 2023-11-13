@@ -8,32 +8,34 @@
 
 namespace kato
 {
-class MiddleContent : public Widget {
+struct MiddleContent : Widget {
 	Q_OBJECT
 
     public:
-	explicit MiddleContent(uint64_t id, const QString &name,
+	explicit MiddleContent(uint64_t channel_id, const QString &channel_name,
 			       QWidget *parent = nullptr);
 
-	[[nodiscard]] uint64_t id() const
+	[[nodiscard]] uint64_t channel_id() const
 	{
-		return m_id;
+		return m_channel_id;
 	}
 
-	void add_message(const QString &avatar, const QString &author,
-			 const QString &message);
+	void add_message(uint64_t id, const QString &avatar,
+			 const QString &author, const QString &message);
 
     signals:
-	void message_sent(const QString &message);
+	void message_sent(const QString &message,
+			  const std::function<void()> &on_sent);
 
     private:
 	void setup_ui();
 
-	uint64_t m_id{};
-	QString m_name;
+	uint64_t m_channel_id{};
+	QString m_channel_name;
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(this) };
 	QVBoxLayout *m_main_layout{ new QVBoxLayout() };
 	Header *m_header{};
+	bool m_scroll_to_bottom{};
 	QScrollArea *m_scroll_area{ new QScrollArea(this) };
 	ScrollBar *m_scroll_bar{ new ScrollBar(Qt::Vertical, this) };
 	Widget *m_scroll_area_widget_contents{ new Widget() };
