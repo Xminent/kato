@@ -463,6 +463,10 @@ void MainWindow::set_channel(std::optional<uint64_t> id)
 		}
 	};
 
+	if (id && !m_channels_fetched.contains(*id)) {
+		fetch_channel_messages(*id);
+	}
+
 	auto *content = id ? m_middle_contents.at(*id) : nullptr;
 
 	if (content == m_middle_content) {
@@ -504,6 +508,110 @@ void MainWindow::set_channel(std::optional<uint64_t> id)
 	}
 
 	m_central_layout->removeItem(m_spacer);
+}
+
+void MainWindow::fetch_channel_messages(uint64_t channel_id)
+{
+	auto *middle_content = m_middle_contents[channel_id];
+
+	if (middle_content == nullptr) {
+		return;
+	}
+
+	// build a request to fetch the channel.
+	QNetworkRequest req{ QUrl{
+		QString{ "http://localhost:%1/api/channels/%2/messages" }
+			.arg(API_PORT)
+			.arg(channel_id) } };
+
+	req.setRawHeader("Authorization",
+			 QString{ "Bearer %1" }.arg(m_token).toUtf8());
+
+	qDebug() << "Fetching messages for channel: " << channel_id;
+
+	auto *reply = m_network_manager->get(req);
+
+	connect(reply, &QNetworkReply::finished, reply,
+		[this, middle_content, reply, channel_id] {
+			defer
+			{
+				reply->deleteLater();
+			};
+
+			if (reply->error() != QNetworkReply::NoError) {
+				qDebug() << reply->errorString();
+				return;
+			}
+
+			QJsonDocument doc{ QJsonDocument::fromJson(
+				reply->readAll()) };
+
+			if (!doc.isArray()) {
+				qDebug() << "Not an object";
+				return;
+			}
+
+			m_channels_fetched.insert(channel_id);
+
+			const auto arr = doc.array();
+
+			for (const auto &value : arr) {
+				if (!value.isObject()) {
+					continue;
+				}
+
+				const auto message = value.toObject();
+
+				const auto id_it = message.find("id");
+				const auto author_it = message.find("author");
+				const auto content_it = message.find("content");
+				const auto created_at_it =
+					message.find("created_at");
+
+				if (id_it == message.end() ||
+				    !id_it->isDouble() ||
+				    author_it == message.end() ||
+				    !author_it->isObject() ||
+				    content_it == message.end() ||
+				    !content_it->isString() ||
+				    created_at_it == message.end() ||
+				    !created_at_it->isDouble()) {
+					continue;
+				}
+
+				const auto id = static_cast<uint64_t>(
+					id_it->toDouble());
+				const auto author = author_it->toObject();
+				const auto content = content_it->toString();
+				const auto created_at =
+					QDateTime::fromSecsSinceEpoch(
+						static_cast<qint64>(
+							created_at_it
+								->toDouble()));
+				const auto avatar_it = author.find("avatar");
+				const auto name_it = author.find("username");
+
+				QString avatar;
+
+				if (avatar_it != author.end() &&
+				    avatar_it->isString()) {
+					avatar = avatar_it->toString();
+				}
+
+				if (name_it == author.end() ||
+				    !name_it->isString()) {
+					continue;
+				}
+
+				const auto name = name_it->toString();
+
+				middle_content->add_message(
+					id, avatar, name, content, created_at);
+			}
+
+			qDebug() << "Got " << arr.size()
+				 << " messages for channel: " << channel_id;
+		});
 }
 
 void MainWindow::connect_to_gateway()

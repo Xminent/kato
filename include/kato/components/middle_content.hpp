@@ -1,6 +1,8 @@
 #ifndef KATO_COMPONENTS_MIDDLE_CONTENT_HPP
 #define KATO_COMPONENTS_MIDDLE_CONTENT_HPP
 
+#include "kato/components/smooth_scroll_bar.hpp"
+#include <QDateTime>
 #include <QScrollArea>
 #include <kato/components/form.hpp>
 #include <kato/components/header.hpp>
@@ -21,7 +23,8 @@ struct MiddleContent : Widget {
 	}
 
 	void add_message(uint64_t id, const QString &avatar,
-			 const QString &author, const QString &message);
+			 const QString &author, const QString &message,
+			 const QDateTime &date = QDateTime::currentDateTime());
 
     signals:
 	void message_sent(const QString &message,
@@ -29,6 +32,7 @@ struct MiddleContent : Widget {
 
     private:
 	void setup_ui();
+	void wheelEvent(QWheelEvent *event) override;
 
 	uint64_t m_channel_id{};
 	QString m_channel_name;
@@ -37,7 +41,8 @@ struct MiddleContent : Widget {
 	Header *m_header{};
 	bool m_scroll_to_bottom{};
 	QScrollArea *m_scroll_area{ new QScrollArea(this) };
-	ScrollBar *m_scroll_bar{ new ScrollBar(Qt::Vertical, this) };
+	SmoothScrollBar *m_scroll_bar{ new SmoothScrollBar(Qt::Vertical,
+							   this) };
 	Widget *m_scroll_area_widget_contents{ new Widget() };
 	QVBoxLayout *m_scroll_area_layout{ new QVBoxLayout(
 		m_scroll_area_widget_contents) };

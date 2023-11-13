@@ -33,10 +33,11 @@ MiddleContent::MiddleContent(uint64_t channel_id, const QString &channel_name,
 }
 
 void MiddleContent::add_message(uint64_t id, const QString &avatar,
-				const QString &author, const QString &message)
+				const QString &author, const QString &message,
+				const QDateTime &date)
 {
 	m_messages_layout->addWidget(
-		new MessageItem{ id, avatar, author, message, this });
+		new MessageItem{ id, avatar, author, message, date, this });
 }
 
 void MiddleContent::setup_ui()
@@ -46,7 +47,6 @@ void MiddleContent::setup_ui()
 
 	m_central_layout->addItem(m_main_layout);
 	m_central_layout->setContentsMargins(0, 0, 0, 0);
-
 	m_central_layout->setSpacing(4);
 	m_central_layout->setStretch(0, 1);
 	m_central_layout->setStretch(1, 3);
@@ -67,8 +67,18 @@ void MiddleContent::setup_ui()
 	m_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
+	m_messages_layout->setContentsMargins(0, 0, 0, 0);
+	m_messages_layout->setSpacing(17);
+
+	m_scroll_area_layout->setContentsMargins(0, 0, 8, 0);
+	m_scroll_area_layout->setSpacing(0);
 	m_scroll_area_layout->addLayout(m_messages_layout);
 	m_scroll_area_layout->addSpacerItem(m_spacer);
 	m_scroll_area_widget_contents->set_background_color(Qt::transparent);
+}
+
+void MiddleContent::wheelEvent(QWheelEvent *e)
+{
+	m_scroll_bar->scroll(e->angleDelta().y());
 }
 } // namespace kato

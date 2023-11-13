@@ -10,7 +10,7 @@ Form::Form(const QString &name, QWidget *parent)
 	setup_ui();
 
 	connect(m_input, &QPlainTextEdit::textChanged, this,
-		[this] { m_message = m_input->toPlainText(); });
+		[this] { m_message = m_input->toPlainText().trimmed(); });
 
 	m_input->installEventFilter(this);
 }
@@ -61,19 +61,26 @@ void Form::setup_ui()
 
 bool Form::eventFilter(QObject *obj, QEvent *event)
 {
-	if (obj == m_input && event->type() == QEvent::KeyPress) {
-		const auto *key_event = dynamic_cast<QKeyEvent *>(event);
-
-		if (key_event->key() == Qt::Key_Return ||
-		    key_event->key() == Qt::Key_Enter) {
-			if (!m_message.isEmpty()) {
-				emit message_sent(m_message);
-			}
-
-			return true;
-		}
+	if (obj != m_input || event->type() != QEvent::KeyPress) {
+		return QWidget::eventFilter(obj, event);
 	}
 
-	return QWidget::eventFilter(obj, event);
+	const auto *key_event = dynamic_cast<QKeyEvent *>(event);
+
+	if (const auto key = key_event->key();
+	    key != Qt::Key_Return && key != Qt::Key_Enter) {
+		return QWidget::eventFilter(obj, event);
+	}
+
+	if ((key_event->modifiers() & Qt::ShiftModifier) != 0) {
+		m_input->insertPlainText("\n");
+		return true;
+	}
+
+	if (!m_message.isEmpty()) {
+		emit message_sent(m_message);
+	}
+
+	return true;
 }
 } // namespace kato

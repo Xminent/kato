@@ -46,6 +46,7 @@ struct MainWindow : QMainWindow {
 	void handle_get_users(const QJsonArray &arr);
 	void add_channel(uint64_t id, const QString &name);
 	void set_channel(std::optional<uint64_t> id);
+	void fetch_channel_messages(uint64_t id);
 	void connect_to_gateway();
 	void identify();
 	void resizeEvent(QResizeEvent *event) override;
@@ -63,6 +64,8 @@ struct MainWindow : QMainWindow {
 	// Represents the chat content for each individual channel.
 	std::map<uint64_t, MiddleContent *> m_middle_contents;
 	MiddleContent *m_middle_content{};
+	// Represents the chat contents we've fetched from the API at startup.
+	QSet<uint64_t> m_channels_fetched;
 
 	// Represents the right sidebar for each individual channel.
 	std::map<uint64_t, RightSidebar *> m_right_sidebars;

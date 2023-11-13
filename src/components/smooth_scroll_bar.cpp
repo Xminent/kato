@@ -7,9 +7,9 @@ SmoothScrollBar::SmoothScrollBar(Qt::Orientation orientation, QWidget *parent)
 {
 	m_scroll_animation->setParent(parent);
 	// Set animation curves , stay Qt There is a detailed introduction in the document
-	m_scroll_animation->setEasingCurve(QEasingCurve::OutCubic);
+	m_scroll_animation->setEasingCurve(QEasingCurve::InOutCubic);
 	// Set animation time , The smaller the value, the faster the playback
-	m_scroll_animation->setDuration(0);
+	m_scroll_animation->setDuration(200);
 
 	setStyleSheet(
 		"QScrollBar:vertical {"

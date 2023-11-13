@@ -12,9 +12,11 @@ struct MessageItem : Widget {
 	Q_OBJECT
 
     public:
-	explicit MessageItem(uint64_t id, const QString &avatar,
-			     const QString &author, const QString &message,
-			     QWidget *parent = nullptr);
+	explicit MessageItem(
+		uint64_t id, const QString &avatar, const QString &author,
+		const QString &message,
+		const QDateTime &date = QDateTime::currentDateTime(),
+		QWidget *parent = nullptr);
 
 	[[nodiscard]] uint64_t id() const
 	{
@@ -29,7 +31,11 @@ struct MessageItem : Widget {
 
 	QHBoxLayout *m_layout{ new QHBoxLayout(this) };
 	QVBoxLayout *m_vertical_layout{ new QVBoxLayout() };
-	QHBoxLayout *m_horizontal_layout{ new QHBoxLayout() };
+
+	// Used to store the author and date.
+	Widget *m_author_date_layout{ new Widget(this) };
+	QHBoxLayout *m_horizontal_layout{ new QHBoxLayout(
+		m_author_date_layout) };
 
 	uint64_t m_id{};
 	QString m_author;
