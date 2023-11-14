@@ -60,14 +60,23 @@ install(
 include(InstallRequiredSystemLibraries)
 set(CPACK_GENERATOR "IFW")
 set(CPACK_IFW_ROOT "C:/Qt/QtIFW-4.5.1")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
 
 set(CPACK_IFW_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_IFW_PACKAGE_TITLE "${PROJECT_NAME} Installer")
 set(CPACK_IFW_PACKAGE_PUBLISHER "Xminent")
-set(CPACK_IFW_PACKAGE_WIZARD_STYLE "Aero")
+set(CPACK_IFW_PACKAGE_WIZARD_STYLE "Modern")
 set(CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST OFF)
+set(CPACK_IFW_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/app/app.ico")
+set(CPACK_IFW_PACKAGE_WINDOW_ICON
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/logo.png"
+)
+set(CPACK_IFW_PACKAGE_WATERMARK
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/installer/banner.png"
+)
+set(CPACK_IFW_PACKAGE_STYLE_SHEET
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/installer/styles.qss"
+)
+set(CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME "${PROJECT_NAME} Uninstaller")
 
 find_program(WINDEPLOYQT windeployqt)
 configure_file(
@@ -80,7 +89,7 @@ set(CPACK_PRE_BUILD_SCRIPTS ${CMAKE_BINARY_DIR}/deploy-qt-windows.cmake)
 include(CPack)
 include(CPackIFW)
 
-cpack_add_component(${COMPONENT_NAME_MAIN})
 cpack_ifw_configure_component(
     ${COMPONENT_NAME_MAIN} ESSENTIAL FORCED_INSTALLATION
+    LICENSES "License" ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
 )
