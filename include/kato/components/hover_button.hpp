@@ -9,7 +9,7 @@ struct HoverButton : Widget {
 	Q_OBJECT
 
     public:
-	explicit HoverButton(const QPixmap &pixmap, QWidget *parent = nullptr);
+	HoverButton(const QPixmap &pixmap, QWidget *parent = nullptr);
 
     signals:
 	void clicked();

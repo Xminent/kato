@@ -13,8 +13,8 @@ struct Modal : Widget {
 	Q_OBJECT
 
     public:
-	explicit Modal(const QString &title, QWidget *child = nullptr,
-		       QWidget *parent = nullptr);
+	Modal(const QString &title, QWidget *child = nullptr,
+	      QWidget *parent = nullptr);
 
 	void move_to_center();
 

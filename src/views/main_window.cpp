@@ -193,10 +193,15 @@ void MainWindow::setup_ui()
 
 	setFont(QFont{ "Inter", 10 });
 
+	m_left_sidebar_layout->setContentsMargins(0, 0, 0, 0);
+	m_left_sidebar_layout->setSpacing(0);
+	m_left_sidebar_layout->addWidget(m_left_sidebar);
+	m_left_sidebar_layout->addWidget(m_user_area);
+
 	m_central_layout->setContentsMargins(0, 0, 0, 0);
 	m_central_layout->setSpacing(0);
 	m_central_layout->addWidget(m_navbar);
-	m_central_layout->addWidget(m_left_sidebar);
+	m_central_layout->addLayout(m_left_sidebar_layout);
 	m_central_layout->addSpacerItem(m_spacer);
 
 	setCentralWidget(m_central_widget);

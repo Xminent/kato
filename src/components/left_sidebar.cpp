@@ -47,7 +47,7 @@ LeftSidebar::LeftSidebar(const QString &name, QWidget *parent)
 					     QSizePolicy::Expanding);
 		}
 
-		m_content_layout->addSpacerItem(m_spacer);
+		m_content_layout->insertItem(2, m_spacer);
 	});
 }
 

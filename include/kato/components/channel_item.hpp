@@ -13,8 +13,8 @@ struct ChannelItem : Widget {
 	Q_OBJECT
 
     public:
-	explicit ChannelItem(uint64_t id, const QString &name,
-			     QWidget *parent = nullptr);
+	ChannelItem(uint64_t id, const QString &name,
+		    QWidget *parent = nullptr);
 
 	[[nodiscard]] uint64_t id() const
 	{

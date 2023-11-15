@@ -11,9 +11,9 @@ struct Header : Widget {
 	Q_OBJECT
 
     public:
-	explicit Header(const QString &name,
-			const std::optional<QPixmap> &icon = std::nullopt,
-			QWidget *parent = nullptr);
+	Header(const QString &name,
+	       const std::optional<QPixmap> &icon = std::nullopt,
+	       QWidget *parent = nullptr);
 
     private:
 	void setup_ui();

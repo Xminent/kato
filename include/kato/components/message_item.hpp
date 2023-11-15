@@ -12,11 +12,10 @@ struct MessageItem : Widget {
 	Q_OBJECT
 
     public:
-	explicit MessageItem(
-		uint64_t id, const QString &avatar, const QString &author,
-		const QString &message,
-		const QDateTime &date = QDateTime::currentDateTime(),
-		QWidget *parent = nullptr);
+	MessageItem(uint64_t id, const QString &avatar, const QString &author,
+		    const QString &message,
+		    const QDateTime &date = QDateTime::currentDateTime(),
+		    QWidget *parent = nullptr);
 
 	[[nodiscard]] uint64_t id() const
 	{

@@ -1,6 +1,7 @@
 #ifndef KATO_COMPONENTS_LEFT_SIDEBAR_HPP
 #define KATO_COMPONENTS_LEFT_SIDEBAR_HPP
 
+#include "kato/components/user_area.hpp"
 #include <QScrollArea>
 #include <kato/components/channel_item.hpp>
 #include <kato/components/dropdown_group.hpp>
@@ -15,7 +16,7 @@ struct LeftSidebar : Widget {
 	Q_OBJECT
 
     public:
-	explicit LeftSidebar(const QString &name, QWidget *parent = nullptr);
+	LeftSidebar(const QString &name, QWidget *parent = nullptr);
 
 	void set_channels(const std::map<uint64_t, QString> &channels);
 

@@ -12,7 +12,7 @@ struct DropdownGroup : Widget {
 	Q_OBJECT
 
     public:
-	explicit DropdownGroup(const QString &text, QWidget *parent = nullptr);
+	DropdownGroup(const QString &text, QWidget *parent = nullptr);
 
 	void set_disabled(bool disabled)
 	{

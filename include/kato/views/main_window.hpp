@@ -55,8 +55,12 @@ struct MainWindow : QMainWindow {
 	QHBoxLayout *m_central_layout{ new QHBoxLayout(m_central_widget) };
 	NavBar *m_navbar{ new NavBar(m_central_widget) };
 
+	QVBoxLayout *m_left_sidebar_layout{ new QVBoxLayout() };
 	LeftSidebar *m_left_sidebar{ new LeftSidebar("Guild",
 						     m_central_widget) };
+	UserArea *m_user_area{ new UserArea(
+		"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTUzFFTIH8Au-FWER6Jyna-LB1oBEC5bcuhw&usqp=CAU",
+		"GOAT", m_central_widget) };
 
 	/// Modal that will be shown for whatever currently focused task.
 	std::unique_ptr<Modal> m_modal;

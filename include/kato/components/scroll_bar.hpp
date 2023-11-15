@@ -9,8 +9,7 @@ class ScrollBar : public QScrollBar {
 	Q_OBJECT
 
     public:
-	explicit ScrollBar(Qt::Orientation orientation,
-			   QWidget *parent = nullptr);
+	ScrollBar(Qt::Orientation orientation, QWidget *parent = nullptr);
 };
 } // namespace kato
 

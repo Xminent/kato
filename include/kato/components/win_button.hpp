@@ -9,7 +9,7 @@ struct WinButton : Widget {
 	Q_OBJECT
 
     public:
-	explicit WinButton(const QPixmap &pixmap, QWidget *parent = nullptr);
+	WinButton(const QPixmap &pixmap, QWidget *parent = nullptr);
 
     signals:
 	void left_clicked();

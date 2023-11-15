@@ -14,8 +14,8 @@ struct NavBarItem : Widget {
 	Q_OBJECT
 
     public:
-	explicit NavBarItem(const std::optional<QString> &name,
-			    QWidget *parent = nullptr);
+	NavBarItem(const std::optional<QString> &name,
+		   QWidget *parent = nullptr);
 
 	void unclick();
 

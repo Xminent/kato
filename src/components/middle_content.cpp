@@ -79,6 +79,6 @@ void MiddleContent::setup_ui()
 
 void MiddleContent::wheelEvent(QWheelEvent *e)
 {
-	m_scroll_bar->scroll(e->angleDelta().y());
+	// m_scroll_bar->scroll(e->angleDelta().y());
 }
 } // namespace kato

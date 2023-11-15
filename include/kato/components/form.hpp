@@ -11,7 +11,7 @@ struct Form : Widget {
 	Q_OBJECT
 
     public:
-	explicit Form(const QString &name, QWidget *parent = nullptr);
+	Form(const QString &name, QWidget *parent = nullptr);
 
 	void clear();
 

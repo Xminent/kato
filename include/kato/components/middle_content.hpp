@@ -14,8 +14,8 @@ struct MiddleContent : Widget {
 	Q_OBJECT
 
     public:
-	explicit MiddleContent(uint64_t channel_id, const QString &channel_name,
-			       QWidget *parent = nullptr);
+	MiddleContent(uint64_t channel_id, const QString &channel_name,
+		      QWidget *parent = nullptr);
 
 	[[nodiscard]] uint64_t channel_id() const
 	{

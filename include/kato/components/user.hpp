@@ -10,8 +10,8 @@ struct User : Widget {
 	Q_OBJECT
 
     public:
-	explicit User(const QString &avatar, const QString &name,
-		      QWidget *parent = nullptr);
+	User(const QString &avatar, const QString &name,
+	     QWidget *parent = nullptr);
 
     signals:
 	void left_clicked(User *user);

@@ -16,7 +16,10 @@
     <file>icons/volume.svg</file>
     <file>icons/volume_low.svg</file>
     <file>icons/volume_off.svg</file>
-    <file>icons/mute.svg</file>
+    <file>icons/muted.svg</file>
+    <file>icons/unmuted.svg</file>
+    <file>icons/undeafened.svg</file>
+    <file>icons/deafened.svg</file>
     <file>icons/announcements.svg</file>
     <file>icons/attachment_button.svg</file>
     <file>icons/arrow.svg</file>
