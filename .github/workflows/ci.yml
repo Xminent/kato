@@ -27,7 +27,7 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: "5.15.2"
-          tools: "tools_ifw,4.4.1,qt.tools.ifw.44"
+          tools: "tools_ifw,4.4.1"
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.1
