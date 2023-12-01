@@ -39,7 +39,7 @@ struct MainWindow : QMainWindow {
 	void setup_audio();
 	void setup_signals();
 	void setup_ui();
-	void create_message(uint64_t id, const QString &message,
+	void create_message(const QString &message,
 			    const std::function<void()> &on_sent);
 	void handle_gateway_event(const QJsonObject &json);
 	void handle_get_channels(const QJsonArray &arr);

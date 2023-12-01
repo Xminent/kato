@@ -207,7 +207,7 @@ void MainWindow::setup_ui()
 	setCentralWidget(m_central_widget);
 }
 
-void MainWindow::create_message(uint64_t id, const QString &message,
+void MainWindow::create_message(const QString &message,
 				const std::function<void()> &on_sent)
 {
 	if (m_middle_content == nullptr) {
@@ -219,6 +219,7 @@ void MainWindow::create_message(uint64_t id, const QString &message,
 	};
 	QJsonDocument doc{ data };
 
+	// TODO: Make the endpoint an environment variable.
 	auto url = QString{ "http://localhost:%1/api/channels/%2/messages" }
 			   .arg(API_PORT)
 			   .arg(m_middle_content->channel_id());
@@ -235,7 +236,7 @@ void MainWindow::create_message(uint64_t id, const QString &message,
 	auto *reply = m_network_manager->post(
 		req, doc.toJson(QJsonDocument::Compact));
 
-	connect(reply, &QNetworkReply::finished, reply, [this, reply, on_sent] {
+	connect(reply, &QNetworkReply::finished, reply, [reply, on_sent] {
 		defer
 		{
 			reply->deleteLater();
@@ -450,8 +451,8 @@ void MainWindow::add_channel(uint64_t id, const QString &name)
 	m_middle_contents.emplace(id, middle_content);
 
 	connect(middle_content, &MiddleContent::message_sent, this,
-		[this, id](const QString &message, const auto &on_sent) {
-			create_message(id, message, on_sent);
+		[this](const QString &message, const auto &on_sent) {
+			create_message(message, on_sent);
 		});
 
 	auto *right_sidebar = new RightSidebar{ this };
@@ -532,9 +533,12 @@ void MainWindow::fetch_channel_messages(uint64_t channel_id)
 	req.setRawHeader("Authorization",
 			 QString{ "Bearer %1" }.arg(m_token).toUtf8());
 
-	qDebug() << "Fetching messages for channel: " << channel_id;
+	qDebug() << "Fetching messages for channel: " << channel_id << " from "
+		 << req.url();
 
 	auto *reply = m_network_manager->get(req);
+
+	m_channels_fetched.insert(channel_id);
 
 	connect(reply, &QNetworkReply::finished, reply,
 		[this, middle_content, reply, channel_id] {
@@ -544,7 +548,8 @@ void MainWindow::fetch_channel_messages(uint64_t channel_id)
 			};
 
 			if (reply->error() != QNetworkReply::NoError) {
-				qDebug() << reply->errorString();
+				qDebug() << "Error: " << reply->error();
+				m_channels_fetched.remove(channel_id);
 				return;
 			}
 
@@ -556,8 +561,6 @@ void MainWindow::fetch_channel_messages(uint64_t channel_id)
 				return;
 			}
 
-			m_channels_fetched.insert(channel_id);
-
 			const auto arr = doc.array();
 
 			for (const auto &value : arr) {
@@ -566,7 +569,6 @@ void MainWindow::fetch_channel_messages(uint64_t channel_id)
 				}
 
 				const auto message = value.toObject();
-
 				const auto id_it = message.find("id");
 				const auto author_it = message.find("author");
 				const auto content_it = message.find("content");

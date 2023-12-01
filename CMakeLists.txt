@@ -11,6 +11,7 @@ set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+# TODO: Make this configurable
 list(APPEND CMAKE_PREFIX_PATH "C:/Qt/Qt5.12.12/5.12.12/msvc2017_64")
 
 find_package(
@@ -22,37 +23,33 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp" "include/*.hpp")
 qt5_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/assets/resources.qrc)
 
 if(ANDROID)
-    add_library(${PROJECT_NAME} SHARED ${SOURCES})
+    add_library(kato SHARED ${SOURCES})
 else()
     if(WIN32)
         list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/assets/app/app.rc)
     endif()
-    add_executable(${PROJECT_NAME} ${SOURCES})
+    add_executable(kato ${SOURCES})
 endif()
 
 include(cmake/Dependencies.cmake)
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-set_target_properties(
-    ${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE
-)
-target_include_directories(
-    ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+target_compile_features(kato PRIVATE cxx_std_17)
+set_target_properties(kato PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE)
+target_include_directories(kato PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(
-    ${PROJECT_NAME} PRIVATE Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::Network
-                            Qt5::WebSockets Qt5::Widgets
+    kato PRIVATE Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::Network
+                 Qt5::WebSockets Qt5::Widgets
 )
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
+    target_link_libraries(kato PRIVATE wsock32 ws2_32)
 endif()
 
-set(COMPONENT_NAME_MAIN ${PROJECT_NAME})
+set(COMPONENT_NAME_MAIN kato)
 
 include(GNUInstallDirs)
 install(
-    TARGETS ${PROJECT_NAME}
+    TARGETS kato
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT ${COMPONENT_NAME_MAIN}
 )
@@ -61,8 +58,8 @@ include(InstallRequiredSystemLibraries)
 set(CPACK_GENERATOR "IFW")
 set(CPACK_IFW_ROOT "C:/Qt/QtIFW-4.5.1")
 
-set(CPACK_IFW_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_IFW_PACKAGE_TITLE "${PROJECT_NAME} Installer")
+set(CPACK_IFW_PACKAGE_NAME "Kato")
+set(CPACK_IFW_PACKAGE_TITLE "Kato Installer")
 set(CPACK_IFW_PACKAGE_PUBLISHER "Xminent")
 set(CPACK_IFW_PACKAGE_WIZARD_STYLE "Modern")
 set(CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST OFF)
@@ -76,7 +73,9 @@ set(CPACK_IFW_PACKAGE_WATERMARK
 set(CPACK_IFW_PACKAGE_STYLE_SHEET
     "${CMAKE_CURRENT_SOURCE_DIR}/assets/installer/styles.qss"
 )
-set(CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME "${PROJECT_NAME} Uninstaller")
+set(CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME "Kato Uninstaller")
+set(CPACK_PACKAGE_FILE_NAME "Kato")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Kato")
 
 find_program(WINDEPLOYQT windeployqt)
 configure_file(
