@@ -77,7 +77,7 @@ set(CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME "Kato Uninstaller")
 set(CPACK_PACKAGE_FILE_NAME "Kato")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Kato")
 
-find_program(WINDEPLOYQT windeployqt)
+find_program(WINDEPLOYQT windeployqt REQUIRED)
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/deploy-qt-windows.cmake.in"
     "${CMAKE_BINARY_DIR}/deploy-qt-windows.cmake" @ONLY

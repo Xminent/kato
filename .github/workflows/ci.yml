@@ -27,30 +27,25 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: "5.15.2"
-          tools: "tools_ifw,qt.tools.ifw.46"
+          tools: "tools_ifw"
+          add-tools-to-path: true
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.1
 
       - name: Configure CMake (x64)
         if: ${{ matrix.arch == 'x64' }}
-        run: |
-          echo "$GITHUB_WORKSPACE/Qt/Tools/QtInstallerFramework/4.6/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          cmake -S . -B build -G "Visual Studio ${{ matrix.vs.version }} ${{ matrix.vs.name }}" -A x64 -T host=x64
+        run: cmake -S . -B build -G "Visual Studio ${{ matrix.vs.version }} ${{ matrix.vs.name }}" -A x64 -T host=x64
 
       - name: Configure CMake (x86)
         if: ${{ matrix.arch == 'x86' }}
-        run: |
-          echo "$GITHUB_WORKSPACE/Qt/Tools/QtInstallerFramework/4.6/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          cmake -S . -B build -G "Visual Studio ${{ matrix.vs.version }} ${{ matrix.vs.name }}" -A Win32 -T host=x86
+        run: cmake -S . -B build -G "Visual Studio ${{ matrix.vs.version }} ${{ matrix.vs.name }}" -A Win32 -T host=x86
 
       - name: Build
         run: cmake --build build --config ${{ matrix.config }}
 
       - name: Package
-        run: |
-          echo "$GITHUB_WORKSPACE/Qt/Tools/QtInstallerFramework/4.6/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          cd build && cpack -C ${{ matrix.config }} --verbose
+        run: cd build && cpack -C ${{ matrix.config }} --verbose
 
       - name: Upload Installer
         uses: actions/upload-artifact@v3
