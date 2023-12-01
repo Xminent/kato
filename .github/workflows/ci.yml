@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
+
+jobs:
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, x86]
+        config: [Release, Debug]
+        vs:
+          - { name: 2019, version: 16, os: windows-2019 }
+          - { name: 2022, version: 17, os: windows-2022 }
+
+    name: "Windows ${{ matrix.arch }}-${{ matrix.config }}-vs${{ matrix.vs.name }}"
+    runs-on: ${{ matrix.vs.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Configure CMake (x64)
+        if: ${{ matrix.arch == 'x64' }}
+        run: cmake -S . -B build -G "Visual Studio ${{ matrix.vs.version }} ${{ matrix.vs.name }}" -A x64 -T host=x64
+
+      - name: Configure CMake (x86)
+        if: ${{ matrix.arch == 'x86' }}
+        run: cmake -S . -B build -G "Visual Studio ${{ matrix.vs.version }} ${{ matrix.vs.name }}" -A Win32 -T host=x86
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }}
+
+      - name: Package
+        run: cd build && cpack -C ${{ matrix.config }} --verbose
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: "kato - Windows ${{ matrix.arch }}-${{ matrix.config }}-vs2022"
+          path: "${{ github.workspace }}/build/*.exe"
